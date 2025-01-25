@@ -29,6 +29,7 @@ class Game:
         for x in range(-2000,2001,self.GRASS_IMG.get_width()):
             for y in range(-2000,2001,self.GRASS_IMG.get_height()):
                 self.grass.append(Sprite(self.buffer,(x,y),self.GRASS_IMG,(0,0)))
+        self.game_loop()
 
     def handle_events(self):
         for event in pygame.event.get():
