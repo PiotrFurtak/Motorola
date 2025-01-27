@@ -9,26 +9,21 @@ class Game:
         self.WHITE = (255,255,255)
         self.window = window
         self.WINDOW_WIDTH, self.WINDOW_HEIGHT = window.get_size()
-        # Chcemy mieć pewność, że przekątna okna jest mniejsza lub równa niż bok bufora, żeby nie było dziur w rogach
-        self.DIAGONAL = (self.WINDOW_HEIGHT**2 + self.WINDOW_WIDTH**2)**0.5
-        self.DIAGONAL = int(self.DIAGONAL) + 1
-
-        self.buffer = pygame.surface.Surface((self.DIAGONAL,self.DIAGONAL))
         self.clock = pygame.time.Clock()
-        self.player = Car(self.buffer,(100,150),pygame.image.load("imgs/red-car.png"),(48,18),is_player=True)
+        self.player = Car(self.window,(100,150),pygame.image.load("imgs/red-car.png"),(48,18),is_player=True)
         self.pressed_keys = set()
 
-        self.track = Sprite(self.buffer,(550,200),pygame.image.load("imgs/track.png"),(450,450))
+        self.track = Sprite(self.window,(550,200),pygame.image.load("imgs/track.png"),(450,450))
         self.track.scale(2)
 
-        self.border = Sprite(self.buffer,(550,200),pygame.image.load("imgs/track-border.png"),(450,450))
+        self.border = Sprite(self.window,(550,200),pygame.image.load("imgs/track-border.png"),(450,450))
         self.border.scale(2)
 
         self.grass = []
         self.GRASS_IMG = pygame.image.load("imgs/grass.jpg")
         for x in range(-2000,2001,self.GRASS_IMG.get_width()):
             for y in range(-2000,2001,self.GRASS_IMG.get_height()):
-                self.grass.append(Sprite(self.buffer,(x,y),self.GRASS_IMG,(0,0)))
+                self.grass.append(Sprite(self.window,(x,y),self.GRASS_IMG,(0,0)))
         self.game_loop()
 
     def handle_events(self):
@@ -44,20 +39,16 @@ class Game:
 
     def draw(self):
 
-        # Umieść wszystkie sprite'y na buforze
+        # Obliczenie relatywnych pozycji x,y i wycentrowanie
+        x = self.WINDOW_WIDTH//2-self.player.x
+        y = self.WINDOW_HEIGHT//2-self.player.y
+
+        # Narysowanie wszystkich sprite'ów
         for oSprite in self.grass:
-            oSprite.draw(self.DIAGONAL//2-self.player.x,self.DIAGONAL//2-self.player.y)
-        self.track.draw(self.DIAGONAL//2-self.player.x,self.DIAGONAL//2-self.player.y)
-        self.player.draw(self.DIAGONAL//2-self.player.x,self.DIAGONAL//2-self.player.y)
-        # self.player.oFrontWheels.draw(self.DIAGONAL//2-self.player.x,self.DIAGONAL//2-self.player.y)
-
-        # Obróć bufor
-        rotated = pygame.transform.rotate(self.buffer,(-self.player.angle+90))
-        center = rotated.get_rect().center
-        # Wyświetl bufor
-        self.window.blit(rotated,(self.WINDOW_WIDTH//2-center[0],self.WINDOW_HEIGHT//2-center[1]))
+            oSprite.draw(x,y)
+        self.track.draw(x,y)
+        self.player.draw(x,y)
         
-
 
     def game_loop(self):
         self.running = True
