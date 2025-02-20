@@ -13,6 +13,7 @@ class Game:
         self.clock = pygame.time.Clock()
         self.player = Car(self.window,(500,100),pygame.image.load("imgs/red-car.png"),(48,18),is_player=True)
         self.enemy = Car(self.window,(500,100),pygame.image.load("imgs/red-car.png"),(48,18))
+        self.point = Sprite(self.window,(0,0),pygame.image.load("imgs/point.png"),(2,2),0)
         self.pressed_keys = set()
 
         # self.track = Sprite(self.window,(550,200),pygame.image.load("imgs/track.png"),(450,450))
@@ -41,7 +42,9 @@ class Game:
             elif event.type == pygame.KEYUP:
                 self.pressed_keys.discard(event.key)
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                print(self.find_pixel_values(self.get_real_point(event.coords)))
+                values = self.find_pixel_values(self.get_real_point(event.pos))
+                print(values)
+                print(5000/((abs(values[1]))**(1/2)+10)+values[0])
         self.player.get_pressed_keys(self.pressed_keys)
 
     def draw(self):
@@ -55,8 +58,11 @@ class Game:
             oSprite.draw(x,y)
         for oSprite in self.track:
             oSprite.draw(x,y)
+        self.enemy.oFrontWheels.draw(x,y)
         self.enemy.draw(x,y)
+        self.player.oFrontWheels.draw(x,y)
         self.player.draw(x,y)
+        self.point.draw(x,y)
 
     def game_loop(self):
         self.running = True
@@ -84,7 +90,7 @@ class Game:
     def find_pixel_values(self,coords):
         for oSprite in self.track:
             x,y = coords
-            if oSprite.x <= x <= oSprite.x+oSprite.width and oSprite.y <= y <= oSprite.y+oSprite.height:
+            if oSprite.x-oSprite.centre_point[0] <= x <= oSprite.x+oSprite.centre_point[0] and oSprite.y-oSprite.centre_point[1] <= y <= oSprite.y+oSprite.centre_point[1]:
                 values = oSprite.get_pixel_values(x,y)
                 return values[0]+1000*oSprite.id,values[1]
         return None
@@ -99,10 +105,12 @@ class Game:
                 if values == None:
                     continue
 
-                evaluated = -0.03*values[1]**2+3*values[0]
+                # evaluated = -0.03*values[1]**2+3*values[0]
+                evaluated = 5000/((abs(values[1]))**(1/2)+10)+10*values[0]
                 
                 if evaluated_max < evaluated:
                     evaluated_max = evaluated
                     coords_max = coords
+        self.point.set_position(coords_max)
         self.enemy.oFrontWheels.point_at(coords_max)
-        self.enemy.forward(5)
+        self.enemy.forward(1)
