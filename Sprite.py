@@ -81,9 +81,9 @@ class Sprite:
         return False
 
     def reset_absolute_values(self):
-        self.absolute_width,self.absolute_height = self.image.get_size()
-        self.absolute_x = self.x + self.vector_to_middle[0] - self.absolute_width/2
-        self.absolute_y = self.y - self.vector_to_middle[1] - self.absolute_height/2
+        self.width,self.height = self.image.get_size()
+        self.absolute_x = self.x + self.vector_to_middle[0] - self.width/2
+        self.absolute_y = self.y + self.vector_to_middle[1] - self.height/2
         self.mask = pygame.mask.from_surface(self.image)
         
 
@@ -91,6 +91,8 @@ class Sprite:
         self.image = pygame.transform.scale_by(self.image,factor)
         x,y = self.centre_point
         self.centre_point = factor*x, factor*y
+        x,y = self.vector_to_middle
+        self.vector_to_middle = (x*factor, y*factor)
         self.reset_absolute_values()
         
     def move(self):
