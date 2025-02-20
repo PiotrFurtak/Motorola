@@ -83,7 +83,7 @@ class Sprite:
     def reset_absolute_values(self):
         self.width,self.height = self.image.get_size()
         self.absolute_x = self.x + self.vector_to_middle[0] - self.width/2
-        self.absolute_y = self.y + self.vector_to_middle[1] - self.height/2
+        self.absolute_y = self.y - self.vector_to_middle[1] - self.height/2
         self.mask = pygame.mask.from_surface(self.image)
         
 

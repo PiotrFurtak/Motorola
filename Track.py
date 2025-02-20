@@ -4,14 +4,14 @@ from math import sqrt,atan,pi
 class Turn(Sprite):
     """ type can be for example NE, meaning you approach turn from up(N), and leave a tile from right(E) side """
     # type : (angle, measure point, should_reverse_measured_angle?)
-    types = {"NE":{"angle":90,"measure_point":(120,0),"reverse?":False},
-                "EN":{"angle":90,"measure_point":(120,0),"reverse?":True},
+    types = {"NE":{"angle":90,"measure_point":(130,0),"reverse?":False},
+                "EN":{"angle":90,"measure_point":(130,0),"reverse?":True},
                 "NW":{"angle":180,"measure_point":(0,0),"reverse?":False},
                 "WN":{"angle":180,"measure_point":(0,0),"reverse?":True},
-                "SE":{"angle":0,"measure_point":(120,120),"reverse?":False},
-                "ES":{"angle":0,"measure_point":(120,120),"reverse?":True},
-                "SW":{"angle":270,"measure_point":(0,120),"reverse?":False},
-                "WS":{"angle":270,"measure_point":(0,120),"reverse?":True}}
+                "SE":{"angle":0,"measure_point":(130,130),"reverse?":False},
+                "ES":{"angle":0,"measure_point":(130,130),"reverse?":True},
+                "SW":{"angle":270,"measure_point":(0,130),"reverse?":False},
+                "WS":{"angle":270,"measure_point":(0,130),"reverse?":True}}
     
     def set_pixel_values(measure_point,reverse,height,width):
         values = []
@@ -29,11 +29,11 @@ class Turn(Sprite):
                 if reverse:
                     angle = pi/2 - angle
 
-                middle_rate = 64*width/120    # radius of middle of track width
+                middle_rate = 65*width/130    # radius of middle of track width
                 value_x = angle*180/pi             # Bended geometry
                 value_y = radius-middle_rate       # Bended geometry
 
-                column.append((round(value_x),round(value_y)))
+                column.append((value_x,value_y))
             values.append(column)
         return values
     
@@ -45,7 +45,7 @@ class Turn(Sprite):
     def __init__(self,window,coords,image,type,id):
         self.type = type
         angle = self.types[type]["angle"]
-        Sprite.__init__(self,window,coords,image,(0,0),angle)
+        Sprite.__init__(self,window,coords,image,(65,65),angle)
         self.id = id
         self.scale_factor = 1
         self.values = self.values[type]
@@ -55,8 +55,8 @@ class Turn(Sprite):
         Sprite.scale(self,factor)
 
     def get_pixel_values(self,x,y):
-        x += -self.x
-        y += -self.y
+        x += self.centre_point[0] - self.x
+        y += self.centre_point[1] - self.y
         return self.values[int(y//self.scale_factor)][int(x//self.scale_factor)]
 
 class Forward(Sprite):
@@ -101,7 +101,7 @@ class Forward(Sprite):
         """ type can be for example NS meaning we approach tile from up and go down """
         angle = self.types[type]["angle"]
 
-        Sprite.__init__(self,window,coords,image,(0,0),angle)
+        Sprite.__init__(self,window,coords,image,(65,65),angle)
         self.id =id
         self.values = self.all_types_values[type]
         self.scale_factor = 1
@@ -111,8 +111,8 @@ class Forward(Sprite):
         Sprite.scale(self,factor)
 
     def get_pixel_values(self,x,y):
-        x += -self.x
-        y += -self.y
+        x += self.centre_point[0] - self.x
+        y += self.centre_point[1] - self.y
         return self.values[int(y//self.scale_factor)][int(x//self.scale_factor)]
 
 def get_level(file_name,window,turn_image,forward_image):
@@ -150,11 +150,13 @@ if __name__ == "__main__":
     turn_img = pygame.image.load("imgs/turn.png")
     forward_img = pygame.image.load("imgs/forward.png")
 
-    level = get_level("level-1.txt",window,turn_img,forward_img)
-    for oSprite in level:
-        oSprite.scale(3)
-    id = len(level)
+    # level = get_level("level-1.txt",window,turn_img,forward_img)
+    # for oSprite in level:
+    #     oSprite.scale(3)
+    # id = len(level)
 
+    track = Turn(window,(130,130),turn_img,"NE",1)
+    track.scale(2)
     obj_type = "NE"
     obj_class = Forward
     img = forward_img
@@ -164,45 +166,45 @@ if __name__ == "__main__":
             if event.type == pygame.QUIT:
                 pygame.display.quit()
                 exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                x,y = pygame.mouse.get_pos()
-                x = x - x%130
-                y = y - y%130
-                clicked_something = False
-                for obj in level:
-                    if obj.coords == (x,y):
-                        clicked_something = True
-                if not clicked_something:
-                    id += 1
-                    print(obj_class)
-                    level.append(obj_class(window,(x,y),img,obj_type,id))
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN:
-                    update_level("level-1.txt",level)
-                elif event.key == pygame.K_w:
-                    obj_type = "N" + obj_type[1]
-                elif event.key == pygame.K_d:
-                    obj_type = "E" + obj_type[1]
-                elif event.key == pygame.K_s:
-                    obj_type = "S" + obj_type[1]
-                elif event.key == pygame.K_a:
-                    obj_type = "W" + obj_type[1]
-                elif event.key == pygame.K_i:
-                    obj_type = obj_type[0] + "N"
-                elif event.key == pygame.K_l:
-                    obj_type = obj_type[0] + "E"
-                elif event.key == pygame.K_k:
-                    obj_type = obj_type[0] + "S"
-                elif event.key == pygame.K_j:
-                    obj_type = obj_type[0] + "W"
-                elif event.key == pygame.K_0:
-                    obj_class = Forward if obj_class == Turn else Turn
-                    img = forward_img if obj_class == Forward else turn_img
-                print(obj_class,obj_type)
+            # if event.type == pygame.MOUSEBUTTONDOWN:
+            #     x,y = pygame.mouse.get_pos()
+            #     x = x - x%130
+            #     y = y - y%130
+            #     clicked_something = False
+            #     for obj in level:
+            #         if obj.coords == (x,y):
+            #             clicked_something = True
+            #     if not clicked_something:
+            #         id += 1
+            #         print(obj_class)
+            #         level.append(obj_class(window,(x,y),img,obj_type,id))
+            # if event.type == pygame.KEYDOWN:
+            #     if event.key == pygame.K_RETURN:
+            #         update_level("level-1.txt",level)
+            #     elif event.key == pygame.K_w:
+            #         obj_type = "N" + obj_type[1]
+            #     elif event.key == pygame.K_d:
+            #         obj_type = "E" + obj_type[1]
+            #     elif event.key == pygame.K_s:
+            #         obj_type = "S" + obj_type[1]
+            #     elif event.key == pygame.K_a:
+            #         obj_type = "W" + obj_type[1]
+            #     elif event.key == pygame.K_i:
+            #         obj_type = obj_type[0] + "N"
+            #     elif event.key == pygame.K_l:
+            #         obj_type = obj_type[0] + "E"
+            #     elif event.key == pygame.K_k:
+            #         obj_type = obj_type[0] + "S"
+            #     elif event.key == pygame.K_j:
+            #         obj_type = obj_type[0] + "W"
+            #     elif event.key == pygame.K_0:
+            #         obj_class = Forward if obj_class == Turn else Turn
+            #         img = forward_img if obj_class == Forward else turn_img
+            #     print(obj_class,obj_type)
 
         window.fill("Black")
-
-        for obj in level:
-            obj.draw()
+        track.draw()
+        # for obj in level:
+        #     obj.draw()
         pygame.display.update()
         sleep(0.01)
