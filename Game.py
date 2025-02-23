@@ -11,8 +11,8 @@ class Game:
         self.window = window
         self.WINDOW_WIDTH, self.WINDOW_HEIGHT = window.get_size()
         self.clock = pygame.time.Clock()
-        self.player = Car(self.window,(500,100),pygame.image.load("imgs/red-car.png"),(48,18),is_player=True)
-        self.enemy = Car(self.window,(500,100),pygame.image.load("imgs/red-car.png"),(48,18))
+        self.player = Car(self.window,(0,-500),pygame.image.load("imgs/red-car.png"),(38,19),is_player=True)
+        self.enemy = Car(self.window,(0,-500),pygame.image.load("imgs/red-car.png"),(38,19))
         self.point = Sprite(self.window,(0,0),pygame.image.load("imgs/point.png"),(2,2),0)
         self.pressed_keys = set()
 
@@ -44,7 +44,7 @@ class Game:
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 values = self.find_pixel_values(self.get_real_point(event.pos))
                 print(values)
-                print(5000/((abs(values[1]))**(1/2)+10)+values[0])
+                print(500/((abs(values[1]))**(1/2)+10)+values[0])
         self.player.get_pressed_keys(self.pressed_keys)
 
     def draw(self):
@@ -58,9 +58,7 @@ class Game:
             oSprite.draw(x,y)
         for oSprite in self.track:
             oSprite.draw(x,y)
-        self.enemy.oFrontWheels.draw(x,y)
         self.enemy.draw(x,y)
-        self.player.oFrontWheels.draw(x,y)
         self.player.draw(x,y)
         self.point.draw(x,y)
 
@@ -97,20 +95,23 @@ class Game:
     
     def enemy_move(self):
         evaluated_max = -10000
+        angle_max = 0
         coords_max = (0,0)
-        for x in range(-30,31):
-            for y in range(-30,31):
-                coords = (x+self.enemy.x,y+self.enemy.y)
-                values = self.find_pixel_values(coords)
-                if values == None:
-                    continue
-
-                # evaluated = -0.03*values[1]**2+3*values[0]
-                evaluated = 5000/((abs(values[1]))**(1/2)+10)+10*values[0]
-                
-                if evaluated_max < evaluated:
-                    evaluated_max = evaluated
-                    coords_max = coords
+        r = 45
+        for angle in range(-45,46,5):
+            x = r*cos(radians(angle+self.enemy.angle)) + self.enemy.x
+            y = -r*sin(radians(angle+self.enemy.angle)) + self.enemy.y
+            values = self.find_pixel_values((x,y))
+            if values == None:
+                continue
+            evaluated = 500/((abs(values[1]))**(1/2)+10)+values[0]
+            if evaluated_max < evaluated:
+                evaluated_max = evaluated
+                angle_max = angle
+                coords_max = (x,y)
+        self.enemy.stear = angle_max
+        self.enemy.joystick_y = 1
+        self.enemy.joystick_x = -1
+        self.enemy.move()
         self.point.set_position(coords_max)
-        self.enemy.oFrontWheels.point_at(coords_max)
-        self.enemy.forward(1)
+        # print(angle_max,evaluated_max)
