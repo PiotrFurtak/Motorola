@@ -50,8 +50,11 @@ class Game:
     def draw(self):
 
         # Obliczenie relatywnych pozycji x,y i wycentrowanie
-        x = self.WINDOW_WIDTH//2-self.player.x
-        y = self.WINDOW_HEIGHT//2-self.player.y
+        # x = self.WINDOW_WIDTH//2-self.player.x
+        # y = self.WINDOW_HEIGHT//2-self.player.y
+
+        x = self.WINDOW_WIDTH//2-self.enemy.x
+        y = self.WINDOW_HEIGHT//2-self.enemy.y
 
         # Narysowanie wszystkich sprite'ów
         for oSprite in self.grass:
@@ -97,19 +100,21 @@ class Game:
         evaluated_max = -10000
         angle_max = 0
         coords_max = (0,0)
-        r = 45
-        for angle in range(-45,46,5):
+        r = 80
+        for angle in range(-90,91,3):
             x = r*cos(radians(angle+self.enemy.angle)) + self.enemy.x
             y = -r*sin(radians(angle+self.enemy.angle)) + self.enemy.y
             values = self.find_pixel_values((x,y))
             if values == None:
                 continue
-            evaluated = 500/((abs(values[1]))**(1/2)+10)+values[0]
+            evaluated = 100/((abs(values[1]))**(2)+1)+values[0]
             if evaluated_max < evaluated:
                 evaluated_max = evaluated
                 angle_max = angle
                 coords_max = (x,y)
-        self.enemy.stear = angle_max
+        if angle_max < 0: self.enemy.stear = -45
+        else: self.enemy.stear = 45
+        # self.enemy.drift = 0
         self.enemy.joystick_y = 1
         self.enemy.joystick_x = -1
         self.enemy.move()

@@ -58,10 +58,10 @@ class Car(Sprite):
 
         self.rotate(self.stear/200*self.velocity)
         if self.joystick_x and abs(self.velocity) > 0:
-            self.drift += 1
+            self.drift += 3
 
         if self.is_braking:
-            self.drift += 3
+            self.drift += 1
             if not self.joystick_x:
                 self.velocity *= 0.9
         
