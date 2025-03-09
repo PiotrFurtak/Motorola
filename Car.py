@@ -8,7 +8,7 @@ class Car(Sprite):
         self.stear = 0
         self.joystick_x = 0
         self.joystick_y = 0
-        self.last_pos = (0,0,0,0,0,0)
+        self.last_pos = (0,0,0)
         self.is_braking = False  # Czy samochód hamuje
         self.pressed_keys = set()
         self.acceleration = 0
@@ -18,6 +18,8 @@ class Car(Sprite):
         self.Xvelocity = 0
         self.Yvelocity = 0
         self.drift = 0
+        self.tile_id = 0
+        self.loops = 0
 
     def get_pressed_keys(self, pressed_keys):
         self.joystick_y = 0
@@ -49,6 +51,8 @@ class Car(Sprite):
         self.stear *= 0.9
 
     def move(self):
+        self.last_pos = (self.x,self.y,self.angle)
+
         self.acceleration += 0.7*self.joystick_y
         self.Xacceleration += 0.7*self.joystick_y*cos(radians(self.angle))
         self.Yacceleration += 0.7*self.joystick_y*sin(radians(self.angle))
@@ -82,15 +86,27 @@ class Car(Sprite):
         distance = self.velocity*self.not_drift/100/1
         dx = self.Xvelocity*self.drift/100/1.5
         dy = -self.Yvelocity*self.drift/100/1.5
-        if not True:
-            distance *= 0.25
-            dx *= 0.25
-            dy *= 0.25
         self.forward(distance)
         self.change_position(dx, dy)
+
 
     def back(self):
         self.set_position(self.last_pos[0:2])
         self.set_angle(self.last_pos[2])
-        self.oFrontWheels.set_position(self.last_pos[3:5])
-        self.oFrontWheels.set_angle(self.last_pos[5])
+    
+    def is_next_loop(self,oTrack):
+        if oTrack == None:
+            return None
+        new_tile_id = oTrack.id
+        if new_tile_id == 1 and self.tile_id > 2:
+            return 1
+        elif self.tile_id == 1 and new_tile_id > 2:
+            return -1
+        return 0
+    
+    def set_loops(self,oTrack):
+        if oTrack == None:
+            return
+        new_tile_id = oTrack.id
+        self.loops += self.is_next_loop(oTrack)
+        self.tile_id = new_tile_id
