@@ -1,10 +1,12 @@
 from Sprite import Sprite
+from ai import ai
 from math import cos,sin,radians
 import pygame
 
-class Car(Sprite):
-    def __init__(self,window,coords,image,centre_point,is_player=False):
+class Car(Sprite,ai):
+    def __init__(self,window,track,coords,image,centre_point,is_player=False):
         Sprite.__init__(self,window,coords,image,centre_point,0,is_player=is_player)
+        self.track = track
         self.stear = 0
         self.joystick_x = 0
         self.joystick_y = 0
@@ -96,15 +98,16 @@ class Car(Sprite):
     
     def is_next_loop(self,oTrack):
         if oTrack == None:
-            return None
+            return 0
         new_tile_id = oTrack.id
-        if new_tile_id == 1 and self.tile_id > 2:
+        if new_tile_id < 3 and self.tile_id > 10:
             return 1
-        elif self.tile_id == 1 and new_tile_id > 2:
+        elif self.tile_id < 3 and new_tile_id > 10:
             return -1
         return 0
     
-    def set_loops(self,oTrack):
+    def set_loops(self):
+        oTrack = self.find_tile(self.coords)
         if oTrack == None:
             return
         new_tile_id = oTrack.id
