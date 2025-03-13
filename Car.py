@@ -4,7 +4,7 @@ from math import cos,sin,radians
 import pygame
 
 class Car(Sprite,ai):
-    def __init__(self,window,track,coords,image,centre_point,is_player=False):
+    def __init__(self,window,track,coords,image,centre_point,is_player=False,ai_id=False):
         Sprite.__init__(self,window,coords,image,centre_point,0,is_player=is_player)
         self.track = track
         self.stear = 0
@@ -22,6 +22,7 @@ class Car(Sprite,ai):
         self.drift = 0
         self.tile_id = 0
         self.loops = 0
+        self.ai_id = ai_id
 
     def get_pressed_keys(self, pressed_keys):
         self.joystick_y = 0
@@ -54,6 +55,7 @@ class Car(Sprite,ai):
 
     def move(self):
         self.last_pos = (self.x,self.y,self.angle)
+        if self.ai_id != False : self.bonus_conditions()
 
         self.acceleration += 0.7*self.joystick_y
         self.Xacceleration += 0.7*self.joystick_y*cos(radians(self.angle))
@@ -91,6 +93,18 @@ class Car(Sprite,ai):
         self.forward(distance)
         self.change_position(dx, dy)
 
+    def bonus_conditions(self):
+        match self.ai_id:
+            case 1:
+                self.joystick_y = 0
+                if self.velocity < 12:
+                    self.joystick_y = 1
+            case 2:
+                self.joystick_y = 0
+                speed_limit = 6 if abs(self.stear) > 10 else 100
+                if self.velocity < speed_limit:
+                    self.acceleration += 0.25
+                    self.joystick_y = 1
 
     def back(self):
         self.set_position(self.last_pos[0:2])

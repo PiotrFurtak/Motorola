@@ -4,7 +4,7 @@ from Car import *
 class ai:
     def __init__(self):
         self.player:Car
-        self.enemy:Car
+        self.enemies:tuple[Car]
         self.point:Sprite
 
     def get_real_point(self,coords):
@@ -29,39 +29,57 @@ class ai:
                 return oTrack
         return None
     
-    def evaluate(self,x,y):
-        value = -0.03*(y)**2+150+x
-        if -10 > y > -25:
-            value += 1000
-        value += self.enemy.is_next_loop(self.find_tile((x,y))) * 100000
+    def evaluate(self,x,y,oCar):
+        oCar:Car
+        match oCar.ai_id:
+            case 1:
+                value = -0.03*(y)**2+150+x
+                if -10 > y > -25:
+                    value += 1000
+                value += oCar.is_next_loop(self.find_tile((x,y))) * 100000
+
+            case 2:
+                value = 2*x
+
+                if abs(y) > 20:
+                    value -= 100000
+                value += oCar.is_next_loop(self.find_tile((x,y))) * 100000
+            
+            case 3:
+                value = 0
+            
+            case 4:
+                value = 0
+
         return value
     
-    def enemy_move(self):
-        evaluated_max = -10000
-        angle_max = 0
-        coords_max = (0, 0)
-        r = 40
+    def check_values(self,r,enemy):
+        output = {}
         for angle in range(-90, 90, 5):
         # for angle in range(-180, 181, 5):
-            x = r * cos(radians(angle + self.enemy.angle)) + self.enemy.x
-            y = -r * sin(radians(angle + self.enemy.angle)) + self.enemy.y
+            x = r * cos(radians(angle + enemy.angle)) + enemy.x
+            y = -r * sin(radians(angle + enemy.angle)) + enemy.y
             # x,y = self.get_real_point(pygame.mouse.get_pos())
             # x = r * cos(radians(angle)) + x
             # y = -r * sin(radians(angle)) + y
             values = self.find_pixel_values((x, y))
             if values == None:
                 continue
-            evaluated = self.evaluate(values[0],values[1])
-            if evaluated_max < evaluated:
-                evaluated_max = evaluated
-                angle_max = angle
-                coords_max = (x, y)
-        self.enemy.stear = angle_max
+            output.setdefault(self.evaluate(values[0],values[1],enemy),(angle,(x,y)))
+        return output
 
-        self.enemy.joystick_y = 0
-        if self.enemy.velocity < 10:
-            self.enemy.joystick_y = 1
-            
-        self.enemy.move()
-        self.enemy.set_loops()
-        self.point.set_position(coords_max)
+
+    def enemy_move(self):
+        for enemy in self.enemies:
+            evaluated:dict = self.check_values(40,enemy)
+            if enemy.ai_id == 2:
+                evaluated.update(self.check_values(150,enemy))
+            evaluated_max = max(evaluated.keys())
+            angle_max, coords_max = evaluated[evaluated_max]
+
+            enemy.stear = angle_max
+
+            enemy.move()
+            enemy.set_loops()
+            if enemy.ai_id == 2:
+                self.point.set_position(coords_max)

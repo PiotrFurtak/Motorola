@@ -33,9 +33,10 @@ class Game(ai):
                 self.grass.append(Sprite(self.window, (x, y), self.GRASS_IMG, (0, 0)))
 
         self.player = Car(self.window,self.track,(0,-500),pygame.image.load("imgs/red-car.png"),(38,19),is_player=True)
-        self.enemy = Car(self.window,self.track,(0,-400),pygame.image.load("imgs/red-car.png"),(38,19))
+        ai_amount = 2
+        self.enemies = tuple([Car(self.window,self.track,(0,-400),pygame.image.load("imgs/red-car.png"),(38,19),ai_id=i+1) for i in range(ai_amount)])
         self.point = Sprite(self.window,(0,0),pygame.image.load("imgs/point.png"),(2,2),0)
-
+        
         self.game_loop()
 
     def handle_events(self):
@@ -65,17 +66,27 @@ class Game(ai):
         x = self.WINDOW_WIDTH//2-self.player.x
         y = self.WINDOW_HEIGHT//2-self.player.y
 
-
+        follow_enemy = 0
         if pygame.K_1 in self.pressed_keys:
-            x = self.WINDOW_WIDTH//2-self.enemy.x
-            y = self.WINDOW_HEIGHT//2-self.enemy.y
+            follow_enemy = 1
+        if pygame.K_2 in self.pressed_keys:
+            follow_enemy = 2
+        if pygame.K_3 in self.pressed_keys:
+            follow_enemy = 3
+        if pygame.K_4 in self.pressed_keys:
+            follow_enemy = 4
+            
+        if follow_enemy:
+            x = self.WINDOW_WIDTH//2-self.enemies[follow_enemy-1].x
+            y = self.WINDOW_HEIGHT//2-self.enemies[follow_enemy-1].y
 
         # Narysowanie wszystkich sprite'ów
         for oSprite in self.grass:
             oSprite.draw(x,y)
         for oSprite in self.track:
             oSprite.draw(x,y)
-        self.enemy.draw(x,y)
+        for oSprite in self.enemies:
+            oSprite.draw(x,y)
         self.player.draw(x,y)
         self.point.draw(x,y)
         if self.radio:
@@ -95,7 +106,7 @@ class Game(ai):
             #
             # Składnia do licznika pętli:
             #
-            print(self.player.loops)
+            # print(self.player.loops)
             #
 
 
