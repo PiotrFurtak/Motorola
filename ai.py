@@ -6,6 +6,7 @@ class ai:
         self.player:Car
         self.enemy:Car
         self.point:Sprite
+
     def get_real_point(self,coords):
         """Inputs are (x,y) of a point ON A SCREEN
         function returns (x,y) of coords used by program in calculations"""
@@ -28,24 +29,39 @@ class ai:
                 return oTrack
         return None
     
+    def evaluate(self,x,y):
+        value = -0.03*(y)**2+150+x
+        if -10 > y > -25:
+            value += 1000
+        value += self.enemy.is_next_loop(self.find_tile((x,y))) * 100000
+        return value
+    
     def enemy_move(self):
         evaluated_max = -10000
         angle_max = 0
         coords_max = (0, 0)
-        r = 45
-        for angle in range(-45, 46, 5):
+        r = 40
+        for angle in range(-90, 90, 5):
+        # for angle in range(-180, 181, 5):
             x = r * cos(radians(angle + self.enemy.angle)) + self.enemy.x
             y = -r * sin(radians(angle + self.enemy.angle)) + self.enemy.y
+            # x,y = self.get_real_point(pygame.mouse.get_pos())
+            # x = r * cos(radians(angle)) + x
+            # y = -r * sin(radians(angle)) + y
             values = self.find_pixel_values((x, y))
             if values == None:
                 continue
-            evaluated = 500 / ((abs(values[1])) ** (1 / 2) + 10) + values[0]
+            evaluated = self.evaluate(values[0],values[1])
             if evaluated_max < evaluated:
                 evaluated_max = evaluated
                 angle_max = angle
                 coords_max = (x, y)
         self.enemy.stear = angle_max
-        self.enemy.joystick_y = 1
-        self.enemy.joystick_x = -1
+
+        self.enemy.joystick_y = 0
+        if self.enemy.velocity < 10:
+            self.enemy.joystick_y = 1
+            
         self.enemy.move()
+        self.enemy.set_loops()
         self.point.set_position(coords_max)
