@@ -1,11 +1,10 @@
 from math import cos, sin, radians
 from Car import *
 
-class ai:
-    def __init__(self):
-        self.player:Car
-        self.enemy:Car
-        self.point:Sprite
+class ai(Car):
+    def __init__(self,window,track,coords,image,centre_point,car_id,player):
+        Car.__init__(self,window,track,coords,image,centre_point,car_id)
+        self.player = player
 
     def get_real_point(self,coords):
         """Inputs are (x,y) of a point ON A SCREEN
@@ -22,46 +21,93 @@ class ai:
             return values[0]+1000*oTrack.id,values[1]
         return None
     
-    def find_tile(self,coords):
-        for oTrack in self.track:
-            x,y = coords
-            if oTrack.x-oTrack.centre_point[0] <= x <= oTrack.x+oTrack.centre_point[0] and oTrack.y-oTrack.centre_point[1] <= y <= oTrack.y+oTrack.centre_point[1]:
-                return oTrack
-        return None
     
-    def evaluate(self,x,y):
-        value = -0.03*(y)**2+150+x
-        if -10 > y > -25:
-            value += 1000
-        value += self.enemy.is_next_loop(self.find_tile((x,y))) * 100000
+    def evaluate(self,pixel_values,coords):
+        x,y = pixel_values
+        match self.car_id:
+            case 1:
+                value = -0.03*(y)**2+150+x
+                if -10 > y > -20:
+                    value += 500
+                value += self.is_next_loop(self.find_tile(coords)) * 100000
+
+            case 2:
+                value = 2*x
+
+                if abs(y) > 20:
+                    value -= 100000
+                value += self.is_next_loop(self.find_tile(coords)) * 100000
+            
+            case 3:
+                value = x
+                if abs(y) > 25:
+                    value -= 100000
+                value += self.is_next_loop(self.find_tile(coords)) * 100000
+
+                distance = ((self.player.coords[0]-coords[0])**2 + (self.player.coords[1]-coords[1])**2)**(1/2)
+
+                # Omijaj auto, jeśli nie jestem na prawie identycznym progresie wyścigu
+                player_pixel_values = self.find_pixel_values(self.player.coords)
+                if player_pixel_values == None:
+                    return value
+                if abs(self.find_pixel_values(self.coords)[0]-player_pixel_values[0]) > 10:
+                    if distance < 150:
+                        value -= 100000
+                else:
+                    # Jestem tuż obok => Unikalna wartość oznaczająca, że mam się w gracza wpierdolić
+                    value = -213700
+
+            case 4:
+                value = 0
+
         return value
     
-    def enemy_move(self):
-        evaluated_max = -10000
-        angle_max = 0
-        coords_max = (0, 0)
-        r = 40
-        for angle in range(-90, 90, 5):
-        # for angle in range(-180, 181, 5):
-            x = r * cos(radians(angle + self.enemy.angle)) + self.enemy.x
-            y = -r * sin(radians(angle + self.enemy.angle)) + self.enemy.y
+    def check_values(self,r):
+        output = {}
+        # for angle in range(-90, 90, 5):
+        for angle in range(-180, 181, 5):
+            x = r * cos(radians(angle + self.angle)) + self.x
+            y = -r * sin(radians(angle + self.angle)) + self.y
             # x,y = self.get_real_point(pygame.mouse.get_pos())
             # x = r * cos(radians(angle)) + x
             # y = -r * sin(radians(angle)) + y
             values = self.find_pixel_values((x, y))
             if values == None:
                 continue
-            evaluated = self.evaluate(values[0],values[1])
-            if evaluated_max < evaluated:
-                evaluated_max = evaluated
-                angle_max = angle
-                coords_max = (x, y)
-        self.enemy.stear = angle_max
+            output.setdefault(self.evaluate(values,(x,y)),(angle,(x,y)))
+        return output
 
-        self.enemy.joystick_y = 0
-        if self.enemy.velocity < 10:
-            self.enemy.joystick_y = 1
-            
-        self.enemy.move()
-        self.enemy.set_loops()
+
+    def enemy_move(self):
+        evaluated:dict = self.check_values(40)
+        if self.car_id == 2:
+            evaluated.update(self.check_values(150))
+        if self.car_id == 3:
+            evaluated.update(self.check_values(150))
+
+
+        if len(evaluated.keys()) == 0:
+            self.stear = 0
+            self.joystick_y = -1
+        else:
+
+            evaluated_max = max(evaluated.keys())
+            angle_max, coords_max = evaluated[evaluated_max]
+
+            self.stear = angle_max
+
+        if -213700 in evaluated.keys():
+            # Wpierdol się w gracza
+            angle = self.angle
+            self.point_at(self.player.coords)
+            self.stear = self.angle-angle
+            if self.stear < -180:
+                self.stear += 360
+            elif self.stear > 180:
+                self.stear += -360
+            self.stear*= 2
+            self.set_angle(angle)
+
+        self.move()
+        self.set_loops()
         self.point.set_position(coords_max)

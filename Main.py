@@ -2,17 +2,18 @@ import pygame
 from sys import exit
 from Game import Game
 from Button import Button
-WINDOW_WIDTH, WINDOW_HEIGHT = (640,480)
+# WINDOW_WIDTH, WINDOW_HEIGHT = (640,480)
+WINDOW_WIDTH, WINDOW_HEIGHT = pygame.display.get_desktop_sizes()[0]
 window = pygame.display.set_mode((WINDOW_WIDTH,WINDOW_HEIGHT))
 listOfButtons = []
 
 BUTTON = pygame.image.load("imgs/start-button.png")
 BUTTON = pygame.transform.scale(BUTTON,(100,50))
-startButton = Button(window,(320,240),BUTTON)
+startButton = Button(window,(WINDOW_WIDTH//2,WINDOW_HEIGHT//2),BUTTON)
 
 def start_game():
     oGame = Game(window)
-
+start_game()
 def main_loop():
     while True:
         for event in pygame.event.get():
@@ -27,6 +28,10 @@ def main_loop():
                     if startButton.isClicked(event.pos):
                         # Uruchom grę
                         start_game()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    exit()
         
         window.fill((0,0,0))
         startButton.draw()
