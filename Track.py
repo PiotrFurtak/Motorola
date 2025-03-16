@@ -54,7 +54,8 @@ class Turn(Sprite):
         self.scale_factor = factor
         Sprite.scale(self,factor)
 
-    def get_pixel_values(self,x,y):
+    def get_pixel_values(self,coords):
+        x,y = coords
         x += self.centre_point[0] - self.x
         y += self.centre_point[1] - self.y
         return self.values[int(y//self.scale_factor)][int(x//self.scale_factor)]
@@ -110,7 +111,8 @@ class Forward(Sprite):
         self.scale_factor = factor
         Sprite.scale(self,factor)
 
-    def get_pixel_values(self,x,y):
+    def get_pixel_values(self,coords):
+        x,y = coords
         x += self.centre_point[0] - self.x
         y += self.centre_point[1] - self.y
         return self.values[int(y//self.scale_factor)][int(x//self.scale_factor)]
