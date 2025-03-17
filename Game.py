@@ -16,24 +16,26 @@ class Game:
 
         self.font = pygame.font.Font(None, 36)  # Czcionka do radia
         self.radio = None  # Na początku nie ma radia
-
+        self.buffered = pygame.surface.Surface((8000, 8000))
         # self.border = Sprite(self.window,(550,200),pygame.image.load("imgs/track-border.png"),(450,450))
         # self.border.scale(3)
         turn_img = pygame.image.load("imgs/turn.png")
         forward_img = pygame.image.load("imgs/forward.png")
-        self.track = get_level("level-1.txt",window,turn_img,forward_img)
-        for oTrack in self.track:
-            oTrack.scale(6)
+        self.track = get_level("level-1.txt",self.buffered,turn_img,forward_img)
         self.grass = []
         self.GRASS_IMG = pygame.image.load("imgs/grass.jpg")
-        for x in range(-4000, 4001, self.GRASS_IMG.get_width()):
-            for y in range(-4000, 4001, self.GRASS_IMG.get_height()):
-                self.grass.append(Sprite(self.window, (x, y), self.GRASS_IMG, (0, 0)))
+        for x in range(0, 8001, self.GRASS_IMG.get_width()):
+            for y in range(0, 8001, self.GRASS_IMG.get_height()):
+                self.buffered.blit(self.GRASS_IMG,(x,y))
+        
+        for oTrack in self.track:
+            oTrack.scale(6)
+        for oTrack in self.track:
+            oTrack.draw(4000,4000)
 
         self.player = Car(self.window,self.track,(0,-1000),pygame.image.load("imgs/red-car.png"),(38,19),0)
         ai_amount = 3
         self.enemies = tuple([ai(self.window,self.track,(0,-800),pygame.image.load("imgs/red-car.png"),(38,19),i+1,self.player) for i in range(ai_amount)])
-
         self.game_loop()
 
     def handle_events(self):
@@ -80,15 +82,10 @@ class Game:
             x = self.WINDOW_WIDTH//2-self.enemies[follow_enemy-1].x
             y = self.WINDOW_HEIGHT//2-self.enemies[follow_enemy-1].y
 
-        # Narysowanie wszystkich sprite'ów
-        for oSprite in self.grass:
-            oSprite.draw(x,y)
-        for oSprite in self.track:
-            oSprite.draw(x,y)
+        self.window.blit(self.buffered,(x-4000,y-4000))
         for oSprite in self.enemies:
             oSprite.draw(x,y)
         self.player.draw(x,y)
-
         if self.radio:
             self.radio.draw()
         
@@ -116,4 +113,5 @@ class Game:
 
             self.draw()
             pygame.display.update()
-            self.clock.tick(60)#
+            self.clock.tick(60)
+            # print(self.clock.get_fps())            
