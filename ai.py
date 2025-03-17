@@ -79,6 +79,7 @@ class ai(Car):
 
 
     def enemy_move(self):
+        evaluated = {}
         evaluated:dict = self.check_values(40)
         if self.car_id == 2:
             evaluated.update(self.check_values(150))
@@ -89,6 +90,7 @@ class ai(Car):
         if len(evaluated.keys()) == 0:
             self.stear = 0
             self.joystick_y = -1
+            coords_max = (0,0)
         else:
 
             evaluated_max = max(evaluated.keys())

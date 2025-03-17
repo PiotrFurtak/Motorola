@@ -119,6 +119,8 @@ class Car(Sprite):
                     self.joystick_y = 1
                 # print(abs(self.find_pixel_values(self.coords)[0]-self.find_pixel_values(self.player.coords)[0]))
                 # self.set_position(self.get_real_point(pygame.mouse.get_pos()))
+            case 4:
+                return
 
     def back(self):
         self.set_position(self.last_pos[0:2])
