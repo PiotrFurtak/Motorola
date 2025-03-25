@@ -33,9 +33,10 @@ class Game:
         for oTrack in self.track:
             oTrack.draw(4000,4000)
 
-        self.player = Car(self.window,self.track,(0,-1000),pygame.image.load("imgs/red-car.png"),(38,19),0)
-        ai_amount = 3
-        self.enemies = tuple([ai(self.window,self.track,(0,-800),pygame.image.load("imgs/red-car.png"),(38,19),i+1,self.player) for i in range(ai_amount)])
+        self.player = Car(self.window,self.track,(0,-1100),pygame.image.load("imgs/red-car.png"),(38,19),0)
+        ai_amount = 4
+        self.enemies = tuple([ai(self.window,self.track,(0,-1000+100*i),pygame.image.load("imgs/red-car.png"),(38,19),i+1,self.player) for i in range(ai_amount)])
+        self.allCars = tuple([self.player]+list(self.enemies))
         self.game_loop()
 
     def handle_events(self):
@@ -75,20 +76,31 @@ class Game:
             follow_enemy = 2
         if pygame.K_3 in self.pressed_keys:
             follow_enemy = 3
-        # if pygame.K_4 in self.pressed_keys:
-        #     follow_enemy = 4
+        if pygame.K_4 in self.pressed_keys:
+            follow_enemy = 4
             
         if follow_enemy:
             x = self.WINDOW_WIDTH//2-self.enemies[follow_enemy-1].x
             y = self.WINDOW_HEIGHT//2-self.enemies[follow_enemy-1].y
 
         self.window.blit(self.buffered,(x-4000,y-4000))
-        for oSprite in self.enemies:
-            oSprite.draw(x,y)
-        self.player.draw(x,y)
+        for oCar in self.allCars[::-1]:
+            oCar.draw(x,y)
         if self.radio:
             self.radio.draw()
-        
+            
+    def check_collisions(self,oCar:Car):
+        for otherCar in self.allCars:
+            if oCar == otherCar: continue
+            if oCar.isColliding(otherCar):
+                oCar.back()
+
+                oCar.Xvelocity, otherCar.Xvelocity = otherCar.velocity*cos(radians(otherCar.angle)), oCar.velocity*cos(radians(oCar.angle))*1.5
+                oCar.Yvelocity, otherCar.Yvelocity = otherCar.velocity*sin(radians(otherCar.angle)), oCar.velocity*sin(radians(oCar.angle))*1.5
+
+                oCar.drift, otherCar.drift = 100, 100
+
+
     def game_loop(self):
         self.running = True
         while self.running:
@@ -96,7 +108,8 @@ class Game:
             self.window.fill(self.WHITE)
 
             self.player.move()
-            [enemy.enemy_move() for enemy in self.enemies]
+            self.check_collisions(self.player)
+            [(enemy.enemy_move(), self.check_collisions(enemy)) for enemy in self.enemies]
 
 
             self.player.set_loops() # Uaktualniamy aktualną pętlę gracza

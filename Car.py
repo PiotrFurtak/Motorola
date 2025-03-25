@@ -1,9 +1,9 @@
 from Sprite import Sprite
-from math import cos,sin,radians
+from math import cos,sin,radians,copysign
 import pygame
 
 class Car(Sprite):
-    def __init__(self,window,track,coords,image,centre_point,car_id):
+    def __init__(self,window,track,coords,image,centre_point,car_id,player=None):
         self.car_id = car_id
         Sprite.__init__(self,window,coords,image,centre_point,0,is_player=car_id==0)
         self.track = track
@@ -23,10 +23,11 @@ class Car(Sprite):
         self.tile_id = 0
         self.loops = 0
         self.point = Sprite(self.window,(0,0),pygame.image.load("imgs/point.png"),(2,2),0)
+        self.player = player
 
     def draw(self,x,y):
         Sprite.draw(self,x,y)
-        self.point.draw(x,y)
+        # self.point.draw(x,y)
 
     def get_pressed_keys(self, pressed_keys):
         self.joystick_y = 0
@@ -98,29 +99,34 @@ class Car(Sprite):
         self.change_position(dx, dy)
 
     def bonus_conditions(self):
-        if self.joystick_y == -1:
-            return
+        if self.joystick_y == -1: return
+        if not self.is_player: self.joystick_y = 0
         match self.car_id:
             case 1:
-                self.joystick_y = 0
                 if self.velocity < 15:
                     self.joystick_y = 1
             case 2:
-                self.joystick_y = 0
                 speed_limit = 7 if abs(self.stear) > 10 else 100
                 if self.velocity < speed_limit:
                     self.acceleration += 0.25
                     self.joystick_y = 1
             case 3:
-                self.joystick_y = 0
                 speed_limit = 7 if abs(self.stear) > 10 else 100
                 if self.velocity < speed_limit:
                     self.acceleration += 0.25
                     self.joystick_y = 1
-                # print(abs(self.find_pixel_values(self.coords)[0]-self.find_pixel_values(self.player.coords)[0]))
-                # self.set_position(self.get_real_point(pygame.mouse.get_pos()))
             case 4:
-                return
+                speed_limit = 15
+
+                player_pixel_values = self.find_pixel_values(self.player.coords)
+                my_pixel_values = self.find_pixel_values(self.coords)
+
+                if None not in (player_pixel_values, my_pixel_values):
+                    if my_pixel_values[0] - player_pixel_values[0] > 1000:
+                        speed_limit = 10
+                        
+                if self.velocity < speed_limit:
+                    self.joystick_y = 1
 
     def back(self):
         self.set_position(self.last_pos[0:2])

@@ -3,7 +3,7 @@ from Car import *
 
 class ai(Car):
     def __init__(self,window,track,coords,image,centre_point,car_id,player):
-        Car.__init__(self,window,track,coords,image,centre_point,car_id)
+        Car.__init__(self,window,track,coords,image,centre_point,car_id,player)
         self.player = player
 
     def get_real_point(self,coords):
@@ -48,9 +48,10 @@ class ai(Car):
 
                 # Omijaj auto, jeśli nie jestem na prawie identycznym progresie wyścigu
                 player_pixel_values = self.find_pixel_values(self.player.coords)
-                if player_pixel_values == None:
+                my_pixel_values = self.find_pixel_values(self.coords)
+                if player_pixel_values == None or my_pixel_values == None:
                     return value
-                if abs(self.find_pixel_values(self.coords)[0]-player_pixel_values[0]) > 10:
+                if abs(my_pixel_values[0]-player_pixel_values[0]-10) > 10:
                     if distance < 150:
                         value -= 100000
                 else:
@@ -58,7 +59,16 @@ class ai(Car):
                     value = -213700
 
             case 4:
-                value = 0
+                player_pixel_values = self.find_pixel_values(self.player.coords)
+                if player_pixel_values == None:
+                    value = -0.03*(y)**2+150+x
+                elif player_pixel_values[1] < y:
+                    value = -0.03*(y-player_pixel_values[1])**2+150+x
+                else:
+                    value = -0.03*(y)**2+150+x
+                # if -10 > y > -20:
+                #     value += 500
+                value += self.is_next_loop(self.find_tile(coords)) * 100000
 
         return value
     
@@ -85,6 +95,8 @@ class ai(Car):
             evaluated.update(self.check_values(150))
         if self.car_id == 3:
             evaluated.update(self.check_values(150))
+        if self.car_id == 4:
+            evaluated.update(self.check_values(100))
 
 
         if len(evaluated.keys()) == 0:
@@ -107,9 +119,8 @@ class ai(Car):
                 self.stear += 360
             elif self.stear > 180:
                 self.stear += -360
-            self.stear*= 2
+            self.stear*= 1.5
             self.set_angle(angle)
-
         self.move()
         self.set_loops()
         self.point.set_position(coords_max)
