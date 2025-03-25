@@ -76,16 +76,16 @@ class Forward(Sprite):
 
                 if type[0] == "N":
                     value_x = y
-                    value_y = abs(x-middle_rate)
+                    value_y = x-middle_rate
                 elif type[0] == "E":
                     value_x = 130-x
-                    value_y = abs(y-middle_rate)
+                    value_y = y-middle_rate
                 elif type[0] == "S":
                     value_x = 130-y
-                    value_y = abs(x-middle_rate)
+                    value_y = -x+middle_rate
                 elif type[0] == "W":
                     value_x = x
-                    value_y = abs(y-middle_rate)
+                    value_y = -y+middle_rate
                 
 
                 column.append((value_x,value_y))
