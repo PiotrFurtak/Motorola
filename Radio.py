@@ -26,7 +26,7 @@ class CarRadio:
             self.radio_on = True
 
     def draw(self):
-        status_text = f"Radio: {music_dict[self.music_file]}" if self.radio_on else "Radio: WYŁĄCZONE"
+        status_text = f"Radio (R): {music_dict[self.music_file]}" if self.radio_on else "Radio (R): WYŁĄCZONE"
         text = self.font.render(status_text, True, (0, 0, 0))
         self.screen.blit(text, (self.width // 1.7 - text.get_width() // 3, self.height // 1.07))
 

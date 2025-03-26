@@ -15,21 +15,27 @@ startButton = Button(window,(WINDOW_WIDTH//2,WINDOW_HEIGHT//2),BUTTON)
 
 def start_game():
     oGame = Game(window)
-start_game()
+    scores = oGame.scores
+    return scores
+def draw_table(scores):
+    window.fill((0,0,0))
+    for oCar, time,best_lap_time in scores:
+        print(oCar.car_id,round(time,3),round(best_lap_time,3))
+
 def main_loop():
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                # Zakończenie działania programu
                 pygame.quit()
                 exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                # Lewy przycisk myszy
                 if event.button == 1:
-                    # Sprawdź czy najechano na jakiś przycisk
                     if startButton.isClicked(event.pos):
-                        # Uruchom grę
-                        start_game()
+                        scores = start_game()
+                        if scores:
+                            draw_table(scores)
+                            input()
+
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     pygame.quit()

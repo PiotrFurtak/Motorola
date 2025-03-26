@@ -1,5 +1,6 @@
 from Sprite import Sprite
 from math import cos,sin,radians,copysign
+from time import time
 import pygame
 
 class Car(Sprite):
@@ -21,7 +22,9 @@ class Car(Sprite):
         self.Yvelocity = 0
         self.drift = 0
         self.tile_id = 0
-        self.loops = 0
+        self.laps = 0
+        self.laps_times = [time()]
+        self.best_lap_time = 1000000
         self.point = Sprite(self.window,(0,0),pygame.image.load("imgs/point.png"),(2,2),0)
 
     def draw(self,x,y):
@@ -100,22 +103,27 @@ class Car(Sprite):
         self.set_position(self.last_pos[0:2])
         self.set_angle(self.last_pos[2])
     
-    def is_next_loop(self,oTrack):
+    def is_next_lap(self,oTrack):
         if oTrack == None:
             return 0
         new_tile_id = oTrack.id
         if new_tile_id < 3 and self.tile_id > 10:
+            if self.laps != len(self.laps_times)-1:
+                return 1
+            self.laps_times.append(time())
+            if self.laps_times[-1] - self.laps_times[-2] < self.best_lap_time:
+                self.best_lap_time = self.laps_times[-1] - self.laps_times[-2]
             return 1
         elif self.tile_id < 3 and new_tile_id > 10:
             return -1
         return 0
     
-    def set_loops(self):
+    def set_laps(self):
         oTrack = self.find_tile(self.coords)
         if oTrack == None:
             return
         new_tile_id = oTrack.id
-        self.loops += self.is_next_loop(oTrack)
+        self.laps += self.is_next_lap(oTrack)
         self.tile_id = new_tile_id
 
     def find_tile(self,coords):

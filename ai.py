@@ -29,20 +29,20 @@ class ai(Car):
                 value = -0.03*(y)**2+150+x
                 if -10 > y > -20:
                     value += 500
-                value += self.is_next_loop(self.find_tile(coords)) * 100000
+                value += self.is_next_lap(self.find_tile(coords)) * 100000
 
             case 2:
                 value = 2*x
 
                 if abs(y) > 20:
                     value -= 100000
-                value += self.is_next_loop(self.find_tile(coords)) * 100000
+                value += self.is_next_lap(self.find_tile(coords)) * 100000
             
             case 3:
                 value = x
                 if abs(y) > 25:
                     value -= 100000
-                value += self.is_next_loop(self.find_tile(coords)) * 100000
+                value += self.is_next_lap(self.find_tile(coords)) * 100000
 
                 distance = ((self.player.coords[0]-coords[0])**2 + (self.player.coords[1]-coords[1])**2)**(1/2)
 
@@ -68,7 +68,7 @@ class ai(Car):
                     value = -0.03*(y)**2+150+x
                 # if -10 > y > -20:
                 #     value += 500
-                value += self.is_next_loop(self.find_tile(coords)) * 100000
+                value += self.is_next_lap(self.find_tile(coords)) * 100000
 
         return value
     
@@ -123,7 +123,7 @@ class ai(Car):
             self.set_angle(angle)
         self.bonus_conditions()
         self.move()
-        self.set_loops()
+        self.set_laps()
         self.point.set_position(coords_max)
 
     def bonus_conditions(self):
