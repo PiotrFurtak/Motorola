@@ -38,7 +38,7 @@ class Game:
         ai_amount = 4
         self.enemies = tuple([ai(self.window,self.track,(-2320+100*i,900),pygame.image.load("imgs/red-car.png"),(38,19),90,i+1,self.player) for i in range(ai_amount)])
         self.allCars = tuple([self.player]+list(self.enemies))
-        self.max_laps = 30  # Maksymalna liczba okrążeń do zakończenia gry
+        self.max_laps = 3  # Maksymalna liczba okrążeń do zakończenia gry
         self.scores = []
         self.winners = []
         self.begginingTime = time()
