@@ -38,7 +38,7 @@ class Game:
         ai_amount = 4
         self.enemies = tuple([ai(self.window,self.track,(-2320+100*i,900),pygame.image.load("imgs/red-car.png"),(38,19),90,i+1,self.player) for i in range(ai_amount)])
         self.allCars = tuple([self.player]+list(self.enemies))
-        self.max_laps = 3  # Maksymalna liczba okrążeń do zakończenia gry
+        self.max_laps = 30  # Maksymalna liczba okrążeń do zakończenia gry
         self.scores = []
         self.winners = []
         self.begginingTime = time()
@@ -88,7 +88,7 @@ class Game:
         surface = pygame.surface.Surface((self.WINDOW_WIDTH,self.WINDOW_HEIGHT),pygame.SRCALPHA)
         pygame.draw.rect(surface,(0,0,0,200),(0,0,400,250))
         self.player.draw(x,y)
-        laps_text = self.font.render(f"Gracz: {self.player.laps}", True, self.WHITE)
+        laps_text = self.font.render(f"Gracz: {len(self.player.laps_times)-1}", True, self.WHITE)
         surface.blit(laps_text, (10, 60))
         for oCar in self.enemies:
             oCar.draw(x,y)
@@ -107,6 +107,7 @@ class Game:
 
         player_lap_time = self.font.render("Czas okrążenia: "+"{0:.3f}".format(time()-self.player.laps_times[-1]),True,self.YELLOW)
         surface.blit(player_lap_time,(10,10))
+        
         self.window.blit(surface,(0,0))
 
 
@@ -147,12 +148,6 @@ class Game:
                 oCar.Yvelocity, otherCar.Yvelocity = otherCar.velocity*sin(radians(otherCar.angle)), oCar.velocity*sin(radians(oCar.angle))*1.5
 
                 oCar.drift, otherCar.drift = 100, 100
-        
-        if True in [oCar.isColliding(oTrack) for oTrack in self.track]:
-            oCar.back()
-            oCar.Xvelocity = -oCar.Xvelocity
-            oCar.Yvelocity = -oCar.Yvelocity
-            oCar.drift = 105
 
     def game_loop(self):
         self.running = True

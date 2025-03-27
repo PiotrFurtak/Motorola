@@ -62,11 +62,6 @@ class Turn(Sprite):
         x += self.centre_point[0] - self.x
         y += self.centre_point[1] - self.y
         return self.values[int(y//self.scale_factor)][int(x//self.scale_factor)]
-    
-    def isColliding(self,oCar):
-        self.hitbox.set_position(self.coords)
-        self.hitbox.set_angle(self.angle)
-        return oCar.isColliding(self.hitbox)
 
 class Forward(Sprite):
     types = {"WE":{"angle":0},
@@ -126,10 +121,6 @@ class Forward(Sprite):
         x += self.centre_point[0] - self.x
         y += self.centre_point[1] - self.y
         return self.values[int(y//self.scale_factor)][int(x//self.scale_factor)]
-    def isColliding(self,oCar):
-        self.hitbox.set_position(self.coords)
-        self.hitbox.set_angle(self.angle)
-        return oCar.isColliding(self.hitbox)
 
 def get_level(file_name,window,turn_image,forward_image):
     file = open("levels/%s"%file_name, "r")

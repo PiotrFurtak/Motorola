@@ -1,4 +1,4 @@
-from math import cos, sin, radians
+from math import cos, sin, radians, copysign
 from Car import *
 
 class ai(Car):
@@ -63,13 +63,13 @@ class ai(Car):
                 player_pixel_values = self.find_pixel_values(self.player.coords)
                 if player_pixel_values == None:
                     value = -0.03*(y)**2+150+x
-                elif player_pixel_values[1] < y:
+                elif player_pixel_values[0]+20 < x:
                     value = -0.03*(y-player_pixel_values[1])**2+150+x
                 else:
                     value = -0.03*(y)**2+150+x
-                # if -10 > y > -20:
-                #     value += 500
+                    
                 value += self.is_next_lap(self.find_tile(coords)) * 100000
+                if abs(y) > 30: value -= 200000
 
         return value
     
@@ -110,6 +110,8 @@ class ai(Car):
             angle_max, coords_max = evaluated[evaluated_max]
 
             self.stear = angle_max
+            if self.car_id == 4:
+                self.stear *= 1.3
 
         if -213700 in evaluated.keys():
             # Wpierdol się w gracza
@@ -145,15 +147,11 @@ class ai(Car):
                     if not self.already_won: self.acceleration += 0.25
                     self.joystick_y = 1
             case 4:
-                speed_limit = 15
-
-                player_pixel_values = self.find_pixel_values(self.player.coords)
-                my_pixel_values = self.find_pixel_values(self.coords)
-
-                if None not in (player_pixel_values, my_pixel_values):
-                    if my_pixel_values[0] - player_pixel_values[0] > 1000:
-                        speed_limit = 10
-                        
+                speed_limit = 13
+                x1,x2 = self.find_pixel_values(self.coords)[0], self.find_pixel_values(self.player.coords)[0]
+                if x1 - 30 < x2:
+                    speed_limit = 18
+                    self.acceleration += 0.15
                 if self.velocity < speed_limit:
                     self.joystick_y = 1
         if self.already_won: self.joystick_y = 0
