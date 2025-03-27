@@ -4,9 +4,9 @@ from time import time
 import pygame
 
 class Car(Sprite):
-    def __init__(self,window,track,coords,image,centre_point,car_id):
+    def __init__(self,window,track,coords,image,centre_point,angle,car_id):
         self.car_id = car_id
-        Sprite.__init__(self,window,coords,image,centre_point,0,is_player=car_id==0)
+        Sprite.__init__(self,window,coords,image,centre_point,angle,is_player=car_id==0)
         self.track = track
         self.stear = 0
         self.joystick_x = 0
@@ -30,6 +30,8 @@ class Car(Sprite):
         self.oil_coords = (0,0)
         self.oil_radius = 0
         self.oiled_time = 0
+        self.hitbox = Sprite(self.window,coords,pygame.image.load("imgs/car-hitbox.png"),centre_point)
+        self.hitbox.scale_by(1/6)
 
     def draw(self,x,y):
         if self.oil_radius > 0:
@@ -84,7 +86,12 @@ class Car(Sprite):
             self.oiled_time = 60*3
             return True
         return False
-        
+    
+    def isColliding(self,oSprite):
+        x,y = self.coords
+        self.hitbox.set_position((x/6,y/6))
+        self.hitbox.set_angle(self.angle)
+        return Sprite.isColliding(self.hitbox,oSprite.hitbox)
 
     def turn(self):
         if self.joystick_x == 0:
@@ -110,10 +117,10 @@ class Car(Sprite):
 
         self.rotate(self.stear/200*self.velocity)
         if self.joystick_x and abs(self.velocity) > 0:
-            self.drift += 3
+            self.drift += 1
 
         if self.is_braking:
-            self.drift += 1
+            self.drift += 3
             if not self.joystick_x:
                 self.velocity *= 0.9
         

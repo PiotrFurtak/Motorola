@@ -27,6 +27,6 @@ class CarRadio:
 
     def draw(self):
         status_text = f"Radio (R): {music_dict[self.music_file]}" if self.radio_on else "Radio (R): WYŁĄCZONE"
-        text = self.font.render(status_text, True, (0, 0, 0))
-        self.screen.blit(text, (self.width // 1.7 - text.get_width() // 3, self.height // 1.07))
+        text:pygame.Surface = self.font.render(status_text, True, (242, 245, 47))
+        return text,(self.width // 1.7 - text.get_width() // 3, self.height // 1.07),text.get_size()
 

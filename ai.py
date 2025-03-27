@@ -2,9 +2,10 @@ from math import cos, sin, radians
 from Car import *
 
 class ai(Car):
-    def __init__(self,window,track,coords,image,centre_point,car_id,player):
-        Car.__init__(self,window,track,coords,image,centre_point,car_id)
+    def __init__(self,window,track,coords,image,angle,centre_point,car_id,player):
+        Car.__init__(self,window,track,coords,image,angle,centre_point,car_id)
         self.player = player
+        self.already_won = False
 
     def get_real_point(self,coords):
         """Inputs are (x,y) of a point ON A SCREEN
@@ -26,16 +27,16 @@ class ai(Car):
         x,y = pixel_values
         match self.car_id:
             case 1:
-                value = -0.03*(y)**2+150+x
-                if -10 > y > -20:
-                    value += 500
-                value += self.is_next_lap(self.find_tile(coords)) * 100000
-
-            case 2:
                 value = 2*x
 
                 if abs(y) > 20:
                     value -= 100000
+                value += self.is_next_lap(self.find_tile(coords)) * 100000
+
+            case 2:
+                value = -0.03*(y)**2+150+x
+                if -10 > y > -20:
+                    value += 500
                 value += self.is_next_lap(self.find_tile(coords)) * 100000
             
             case 3:
@@ -91,7 +92,7 @@ class ai(Car):
     def enemy_move(self):
         evaluated = {}
         evaluated:dict = self.check_values(40)
-        if self.car_id == 2:
+        if self.car_id == 1:
             evaluated.update(self.check_values(150))
         if self.car_id == 3:
             evaluated.update(self.check_values(150))
@@ -131,17 +132,17 @@ class ai(Car):
         if not self.is_player: self.joystick_y = 0
         match self.car_id:
             case 1:
-                if self.velocity < 15:
-                    self.joystick_y = 1
-            case 2:
                 speed_limit = 7 if abs(self.stear) > 10 else 100
                 if self.velocity < speed_limit:
-                    self.acceleration += 0.25
+                    if not self.already_won: self.acceleration += 0.25
+                    self.joystick_y = 1
+            case 2:
+                if self.velocity < 15:
                     self.joystick_y = 1
             case 3:
                 speed_limit = 7 if abs(self.stear) > 10 else 100
                 if self.velocity < speed_limit:
-                    self.acceleration += 0.25
+                    if not self.already_won: self.acceleration += 0.25
                     self.joystick_y = 1
             case 4:
                 speed_limit = 15
@@ -155,3 +156,4 @@ class ai(Car):
                         
                 if self.velocity < speed_limit:
                     self.joystick_y = 1
+        if self.already_won: self.joystick_y = 0
