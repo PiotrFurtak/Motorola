@@ -3,18 +3,21 @@ import random
 from ai import *
 from Track import *
 from Radio import CarRadio  # Zaimportowanie klasy CarRadio
+from time import time
 pygame.init()
 
 class Game:
     def __init__(self, window):
         self.running = False
         self.WHITE = (255, 255, 255)
+        self.BLACK = (0, 0, 0) # Kolor czarnego tła
         self.window = window
         self.WINDOW_WIDTH, self.WINDOW_HEIGHT = window.get_size()
         self.clock = pygame.time.Clock()
         self.pressed_keys = set()
 
         self.font = pygame.font.Font(None, 36)  # Czcionka do radia
+        self.bigger_font = pygame.font.Font(None,72)
         self.radio = None  # Na początku nie ma radia
         self.buffered = pygame.surface.Surface((8000, 8000))
         # self.border = Sprite(self.window,(550,200),pygame.image.load("imgs/track-border.png"),(450,450))
@@ -37,7 +40,13 @@ class Game:
         ai_amount = 4
         self.enemies = tuple([ai(self.window,self.track,(0,-1000+100*i),pygame.image.load("imgs/red-car.png"),(38,19),i+1,self.player) for i in range(ai_amount)])
         self.allCars = tuple([self.player]+list(self.enemies))
+        self.max_laps = 3  # Maksymalna liczba okrążeń do zakończenia gry
+        self.scores = []
+        self.winners = []
+        self.begginingTime = time()
+        self.oil_img = pygame.image.load("imgs/oil.png")
         self.game_loop()
+
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -55,16 +64,10 @@ class Game:
 
             elif event.type == pygame.KEYUP:
                 self.pressed_keys.discard(event.key)
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                pass
-                # values = self.find_pixel_values(self.get_real_point(event.pos))
-                # if values != None:
-                #     print(values)
 
         self.player.get_pressed_keys(self.pressed_keys)
 
     def draw(self):
-
         # Obliczenie relatywnych pozycji x,y i wycentrowanie
         x = self.WINDOW_WIDTH//2-self.player.x
         y = self.WINDOW_HEIGHT//2-self.player.y
@@ -84,11 +87,45 @@ class Game:
             y = self.WINDOW_HEIGHT//2-self.enemies[follow_enemy-1].y
 
         self.window.blit(self.buffered,(x-4000,y-4000))
-        for oCar in self.allCars[::-1]:
+        self.player.draw(x,y)
+        laps_text = self.font.render(f"Gracz: {self.player.laps}", True, self.BLACK)
+        self.window.blit(laps_text, (10, 10))
+        for oCar in self.enemies:
             oCar.draw(x,y)
+            enemy_laps_text = self.font.render(f"Przeciwnik{oCar.car_id}: {oCar.laps}", True, self.BLACK)
+            self.window.blit(enemy_laps_text, (10, 10+30*oCar.car_id))
         if self.radio:
             self.radio.draw()
+        self.window.blit(self.oil_img,(self.WINDOW_WIDTH*7//10,self.WINDOW_HEIGHT//2))
+        oil_text = str(self.player.oil_cooldown//60)
+        if oil_text == "0": oil_text = "K"
+        oil_cooldown = self.bigger_font.render(oil_text,True,self.WHITE)
+        self.window.blit(oil_cooldown,(self.WINDOW_WIDTH*7//10+35,self.WINDOW_HEIGHT//2+27))
             
+    def check_winner(self, oCar):
+        if oCar.laps >= self.max_laps and oCar not in self.winners:
+            self.winners.append(oCar)
+            self.scores.append((oCar,time()-self.begginingTime,oCar.best_lap_time))
+            if oCar == self.player:
+                self.aproximate_scores()
+                self.running = False
+    
+    def aproximate_scores(self):
+        all_times = {}
+        max_score = self.max_laps*(len(self.track))*1000+130
+        for enemy in self.enemies:
+            if enemy in self.winners:
+                continue
+            x,_ = enemy.find_pixel_values(enemy.coords)
+            enemy_score = enemy.laps*(len(self.track))*1000+x
+            aproximated_time = (time()-self.begginingTime)*max_score/enemy_score
+            while aproximated_time in all_times.keys(): aproximated_time += 0.01
+            all_times.setdefault(aproximated_time,enemy)
+        list = sorted(all_times.keys())
+        for key in list:
+            self.scores.append((all_times[key],key,all_times[key].best_lap_time))
+
+
     def check_collisions(self,oCar:Car):
         for otherCar in self.allCars:
             if oCar == otherCar: continue
@@ -99,7 +136,6 @@ class Game:
                 oCar.Yvelocity, otherCar.Yvelocity = otherCar.velocity*sin(radians(otherCar.angle)), oCar.velocity*sin(radians(oCar.angle))*1.5
 
                 oCar.drift, otherCar.drift = 100, 100
-
 
     def game_loop(self):
         self.running = True
@@ -112,13 +148,10 @@ class Game:
             [(enemy.enemy_move(), self.check_collisions(enemy)) for enemy in self.enemies]
 
 
-            self.player.set_loops() # Uaktualniamy aktualną pętlę gracza
-            #
-            # Składnia do licznika pętli:
-            #
-            # print(self.player.loops)
-            #
-
+            self.player.set_laps()
+            [enemy.set_laps() for enemy in self.enemies]
+            [self.check_winner(oCar) for oCar in self.allCars]
+            [enemy.check_oil_collision(self.player) for enemy in self.enemies]
 
             num = random.randint(1, 1)
             if self.radio is None:

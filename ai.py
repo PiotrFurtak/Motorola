@@ -3,7 +3,7 @@ from Car import *
 
 class ai(Car):
     def __init__(self,window,track,coords,image,centre_point,car_id,player):
-        Car.__init__(self,window,track,coords,image,centre_point,car_id,player)
+        Car.__init__(self,window,track,coords,image,centre_point,car_id)
         self.player = player
 
     def get_real_point(self,coords):
@@ -29,20 +29,20 @@ class ai(Car):
                 value = -0.03*(y)**2+150+x
                 if -10 > y > -20:
                     value += 500
-                value += self.is_next_loop(self.find_tile(coords)) * 100000
+                value += self.is_next_lap(self.find_tile(coords)) * 100000
 
             case 2:
                 value = 2*x
 
                 if abs(y) > 20:
                     value -= 100000
-                value += self.is_next_loop(self.find_tile(coords)) * 100000
+                value += self.is_next_lap(self.find_tile(coords)) * 100000
             
             case 3:
                 value = x
                 if abs(y) > 25:
                     value -= 100000
-                value += self.is_next_loop(self.find_tile(coords)) * 100000
+                value += self.is_next_lap(self.find_tile(coords)) * 100000
 
                 distance = ((self.player.coords[0]-coords[0])**2 + (self.player.coords[1]-coords[1])**2)**(1/2)
 
@@ -68,7 +68,7 @@ class ai(Car):
                     value = -0.03*(y)**2+150+x
                 # if -10 > y > -20:
                 #     value += 500
-                value += self.is_next_loop(self.find_tile(coords)) * 100000
+                value += self.is_next_lap(self.find_tile(coords)) * 100000
 
         return value
     
@@ -86,7 +86,7 @@ class ai(Car):
                 continue
             output.setdefault(self.evaluate(values,(x,y)),(angle,(x,y)))
         return output
-
+    
 
     def enemy_move(self):
         evaluated = {}
@@ -121,6 +121,37 @@ class ai(Car):
                 self.stear += -360
             self.stear*= 1.5
             self.set_angle(angle)
+        self.bonus_conditions()
         self.move()
-        self.set_loops()
+        self.set_laps()
         self.point.set_position(coords_max)
+
+    def bonus_conditions(self):
+        if self.joystick_y == -1: return
+        if not self.is_player: self.joystick_y = 0
+        match self.car_id:
+            case 1:
+                if self.velocity < 15:
+                    self.joystick_y = 1
+            case 2:
+                speed_limit = 7 if abs(self.stear) > 10 else 100
+                if self.velocity < speed_limit:
+                    self.acceleration += 0.25
+                    self.joystick_y = 1
+            case 3:
+                speed_limit = 7 if abs(self.stear) > 10 else 100
+                if self.velocity < speed_limit:
+                    self.acceleration += 0.25
+                    self.joystick_y = 1
+            case 4:
+                speed_limit = 15
+
+                player_pixel_values = self.find_pixel_values(self.player.coords)
+                my_pixel_values = self.find_pixel_values(self.coords)
+
+                if None not in (player_pixel_values, my_pixel_values):
+                    if my_pixel_values[0] - player_pixel_values[0] > 1000:
+                        speed_limit = 10
+                        
+                if self.velocity < speed_limit:
+                    self.joystick_y = 1

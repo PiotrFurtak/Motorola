@@ -4,8 +4,8 @@ from Game import Game
 from Button import Button
 # WINDOW_WIDTH, WINDOW_HEIGHT = (640,480)
 WINDOW_WIDTH, WINDOW_HEIGHT = pygame.display.get_desktop_sizes()[0]
-WINDOW_WIDTH -= 10
-WINDOW_HEIGHT -= 10
+# WINDOW_WIDTH -= 10
+# WINDOW_HEIGHT -= 10
 window = pygame.display.set_mode((WINDOW_WIDTH,WINDOW_HEIGHT))
 listOfButtons = []
 
@@ -15,21 +15,27 @@ startButton = Button(window,(WINDOW_WIDTH//2,WINDOW_HEIGHT//2),BUTTON)
 
 def start_game():
     oGame = Game(window)
-start_game()
+    scores = oGame.scores
+    return scores
+def draw_table(scores):
+    window.fill((0,0,0))
+    for oCar, time,best_lap_time in scores:
+        print(oCar.car_id,round(time,3),round(best_lap_time,3))
+
 def main_loop():
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                # Zakończenie działania programu
                 pygame.quit()
                 exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                # Lewy przycisk myszy
                 if event.button == 1:
-                    # Sprawdź czy najechano na jakiś przycisk
                     if startButton.isClicked(event.pos):
-                        # Uruchom grę
-                        start_game()
+                        scores = start_game()
+                        if scores:
+                            draw_table(scores)
+                            # Tu ma być przycisk do pominięcia ekranu
+
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     pygame.quit()

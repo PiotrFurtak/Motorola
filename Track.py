@@ -29,9 +29,9 @@ class Turn(Sprite):
                 if reverse:
                     angle = pi/2 - angle
 
-                middle_rate = 65*width/130    # radius of middle of track width
-                value_x = angle*180/pi             # Bended geometry
-                value_y = radius-middle_rate       # Bended geometry
+                middle_rate = 65*width/130
+                value_x = angle*180/pi
+                value_y = radius-middle_rate
 
                 column.append((value_x,value_y))
             values.append(column)
