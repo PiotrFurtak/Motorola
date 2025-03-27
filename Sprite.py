@@ -11,10 +11,12 @@ class Sprite:
         self.absolute_x,self.absolute_y = self.coords
         self.angle = angle
         self.base_img = image
+        self.mask = pygame.mask.from_surface(self.base_img)
         self.centre_point = centre_point
         self.width = image.get_width()
         self.height = image.get_height()
         self.vector_to_middle = [self.width/2-self.centre_point[0],self.height/2-self.centre_point[1]]
+        self.scale_factor = 1
         self.set_angle(angle)
         self.is_player = is_player
 
@@ -42,7 +44,8 @@ class Sprite:
         self.vector_to_middle = [new_x,new_y]
         self.angle = (self.angle+angle_deg)%360
         self.image = pygame.transform.rotate(self.base_img,self.angle)
-        self.reset_absolute_values()
+        self.scale_by(self.scale_factor)
+        
         
     def set_angle(self,angle_deg):
         dangle = angle_deg - self.angle
@@ -63,16 +66,7 @@ class Sprite:
         self.rotate(angle-self.angle)
 
     def draw(self, relative_x=0, relative_y=0):
-        # Sprawdź, czy obiekt ma drift_offset (tylko dla samochodu)
-        # if hasattr(self, "drift_offset"):
-        #     drifted_image = pygame.transform.rotate(self.image, -self.angle - self.drift_offset)
-        # else:
-        #     drifted_image = pygame.transform.rotate(self.image, -self.angle)
-
-        # Oblicz nową pozycję rysowania
         self.window.blit(self.image, (self.absolute_x + relative_x, self.absolute_y + relative_y))
-        # drifted_rect = drifted_image.get_rect(center=(self.x + relative_x, self.y + relative_y))
-        # self.window.blit(drifted_image, drifted_rect.topleft)
 
     def isColliding(self,oSprite):
         offset = (self.absolute_x-oSprite.absolute_x, self.absolute_y-oSprite.absolute_y)
@@ -84,11 +78,13 @@ class Sprite:
         self.width,self.height = self.image.get_size()
         self.absolute_x = self.x + self.vector_to_middle[0] - self.width/2
         self.absolute_y = self.y - self.vector_to_middle[1] - self.height/2
-        self.mask = pygame.mask.from_surface(self.image)
+        
         
 
-    def scale(self,factor):
+    def scale_by(self,factor):
+        self.scale_factor = factor
         self.image = pygame.transform.scale_by(self.image,factor)
+        self.mask = pygame.mask.from_surface(self.image)
         x,y = self.centre_point
         self.centre_point = factor*x, factor*y
         x,y = self.vector_to_middle

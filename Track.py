@@ -1,5 +1,6 @@
 from Sprite import Sprite
 from math import sqrt,atan,pi
+import pygame
 
 class Turn(Sprite):
     """ type can be for example NE, meaning you approach turn from up(N), and leave a tile from right(E) side """
@@ -46,13 +47,15 @@ class Turn(Sprite):
         self.type = type
         angle = self.types[type]["angle"]
         Sprite.__init__(self,window,coords,image,(65,65),angle)
+        self.hitbox = Sprite(self.window,coords,pygame.image.load("imgs/turn-hitbox.png"),(65,65),angle)
         self.id = id
-        self.scale_factor = 1
+        
         self.values = self.values[type]
 
     def scale(self,factor):
         self.scale_factor = factor
-        Sprite.scale(self,factor)
+        self.hitbox.set_position((self.x/factor,self.y/factor))
+        Sprite.scale_by(self,factor)
 
     def get_pixel_values(self,coords):
         x,y = coords
@@ -103,13 +106,15 @@ class Forward(Sprite):
         angle = self.types[type]["angle"]
 
         Sprite.__init__(self,window,coords,image,(65,65),angle)
+        self.hitbox = Sprite(self.window,coords,pygame.image.load("imgs/forward-hitbox.png"),(65,65),angle)
         self.id =id
         self.values = self.all_types_values[type]
-        self.scale_factor = 1
+        
     
     def scale(self,factor):
         self.scale_factor = factor
-        Sprite.scale(self,factor)
+        self.hitbox.set_position((self.x/factor,self.y/factor))
+        Sprite.scale_by(self,factor)
 
     def get_pixel_values(self,coords):
         x,y = coords

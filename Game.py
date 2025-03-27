@@ -11,17 +11,15 @@ class Game:
         self.running = False
         self.WHITE = (255, 255, 255)
         self.BLACK = (0, 0, 0) # Kolor czarnego tła
+        self.YELLOW = (242, 245, 47)
         self.window = window
         self.WINDOW_WIDTH, self.WINDOW_HEIGHT = window.get_size()
         self.clock = pygame.time.Clock()
         self.pressed_keys = set()
-
-        self.font = pygame.font.Font(None, 36)  # Czcionka do radia
+        self.font = pygame.font.SysFont("bahnschrift", 36)  # Czcionka do radia
         self.bigger_font = pygame.font.Font(None,72)
         self.radio = None  # Na początku nie ma radia
         self.buffered = pygame.surface.Surface((8000, 8000))
-        # self.border = Sprite(self.window,(550,200),pygame.image.load("imgs/track-border.png"),(450,450))
-        # self.border.scale(3)
         turn_img = pygame.image.load("imgs/turn.png")
         forward_img = pygame.image.load("imgs/forward.png")
         self.track = get_level("level-1.txt",self.buffered,turn_img,forward_img)
@@ -36,11 +34,11 @@ class Game:
         for oTrack in self.track:
             oTrack.draw(4000,4000)
 
-        self.player = Car(self.window,self.track,(0,-1100),pygame.image.load("imgs/red-car.png"),(38,19),0)
+        self.player = Car(self.window,self.track,(-2420,900),pygame.image.load("imgs/red-car.png"),(38,19),90,0)
         ai_amount = 4
-        self.enemies = tuple([ai(self.window,self.track,(0,-1000+100*i),pygame.image.load("imgs/red-car.png"),(38,19),i+1,self.player) for i in range(ai_amount)])
+        self.enemies = tuple([ai(self.window,self.track,(-2320+100*i,900),pygame.image.load("imgs/red-car.png"),(38,19),90,i+1,self.player) for i in range(ai_amount)])
         self.allCars = tuple([self.player]+list(self.enemies))
-        self.max_laps = 3  # Maksymalna liczba okrążeń do zakończenia gry
+        self.max_laps = 30  # Maksymalna liczba okrążeń do zakończenia gry
         self.scores = []
         self.winners = []
         self.begginingTime = time()
@@ -87,20 +85,32 @@ class Game:
             y = self.WINDOW_HEIGHT//2-self.enemies[follow_enemy-1].y
 
         self.window.blit(self.buffered,(x-4000,y-4000))
+        surface = pygame.surface.Surface((self.WINDOW_WIDTH,self.WINDOW_HEIGHT),pygame.SRCALPHA)
+        pygame.draw.rect(surface,(0,0,0,200),(0,0,400,250))
         self.player.draw(x,y)
-        laps_text = self.font.render(f"Gracz: {self.player.laps}", True, self.BLACK)
-        self.window.blit(laps_text, (10, 10))
+        laps_text = self.font.render(f"Gracz: {len(self.player.laps_times)-1}", True, self.WHITE)
+        surface.blit(laps_text, (10, 60))
         for oCar in self.enemies:
             oCar.draw(x,y)
-            enemy_laps_text = self.font.render(f"Przeciwnik{oCar.car_id}: {oCar.laps}", True, self.BLACK)
-            self.window.blit(enemy_laps_text, (10, 10+30*oCar.car_id))
+            enemy_laps_text = self.font.render(f"Przeciwnik{oCar.car_id}: {oCar.laps}", True, self.WHITE)
+            surface.blit(enemy_laps_text, (10, 60+35*oCar.car_id))
         if self.radio:
-            self.radio.draw()
-        self.window.blit(self.oil_img,(self.WINDOW_WIDTH*7//10,self.WINDOW_HEIGHT//2))
+            text,(x,y),(width,height) = self.radio.draw()
+            pygame.draw.rect(surface,(0,0,0,200),(x-10,y-10,width+20,height+20))
+            surface.blit(text,(x,y))
+        # pygame.draw.circle(surface,(0, 0, 0, 100),(self.WINDOW_WIDTH*7//10+50,self.WINDOW_HEIGHT//2+50),50)
+        surface.blit(self.oil_img,(self.WINDOW_WIDTH*7//10,self.WINDOW_HEIGHT//2))
         oil_text = str(self.player.oil_cooldown//60)
         if oil_text == "0": oil_text = "K"
-        oil_cooldown = self.bigger_font.render(oil_text,True,self.WHITE)
-        self.window.blit(oil_cooldown,(self.WINDOW_WIDTH*7//10+35,self.WINDOW_HEIGHT//2+27))
+        oil_cooldown = self.bigger_font.render(oil_text,True,self.YELLOW)
+        surface.blit(oil_cooldown,(self.WINDOW_WIDTH*7//10+35,self.WINDOW_HEIGHT//2+27))
+
+        player_lap_time = self.font.render("Czas okrążenia: "+"{0:.3f}".format(time()-self.player.laps_times[-1]),True,self.YELLOW)
+        surface.blit(player_lap_time,(10,10))
+        
+        self.window.blit(surface,(0,0))
+
+
             
     def check_winner(self, oCar):
         if oCar.laps >= self.max_laps and oCar not in self.winners:
@@ -109,6 +119,8 @@ class Game:
             if oCar == self.player:
                 self.aproximate_scores()
                 self.running = False
+            else:
+                oCar.already_won = True
     
     def aproximate_scores(self):
         all_times = {}
@@ -146,7 +158,6 @@ class Game:
             self.player.move()
             self.check_collisions(self.player)
             [(enemy.enemy_move(), self.check_collisions(enemy)) for enemy in self.enemies]
-
 
             self.player.set_laps()
             [enemy.set_laps() for enemy in self.enemies]

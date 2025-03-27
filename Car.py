@@ -4,9 +4,9 @@ from time import time
 import pygame
 
 class Car(Sprite):
-    def __init__(self,window,track,coords,image,centre_point,car_id):
+    def __init__(self,window,track,coords,image,centre_point,angle,car_id):
         self.car_id = car_id
-        Sprite.__init__(self,window,coords,image,centre_point,0,is_player=car_id==0)
+        Sprite.__init__(self,window,coords,image,centre_point,angle,is_player=car_id==0)
         self.track = track
         self.stear = 0
         self.joystick_x = 0
@@ -30,11 +30,15 @@ class Car(Sprite):
         self.oil_coords = (0,0)
         self.oil_radius = 0
         self.oiled_time = 0
+        self.hitbox = Sprite(self.window,coords,pygame.image.load("imgs/car-hitbox.png"),centre_point)
+        self.hitbox.scale_by(1/6)
 
     def draw(self,x,y):
+        if self.oil_cooldown == 0 and self.oil_radius > 0:
+            self.oil_radius -= 1
         if self.oil_radius > 0:
             pygame.draw.circle(self.window,(0,0,0),(x+self.oil_coords[0],y+self.oil_coords[1]),self.oil_radius)
-            if self.oil_radius < 75:
+            if self.oil_radius < 75 and self.oil_cooldown > 0:
                 self.oil_radius += 1
         Sprite.draw(self,x,y)
         # self.point.draw(x,y)
@@ -84,13 +88,21 @@ class Car(Sprite):
             self.oiled_time = 60*3
             return True
         return False
-        
+    
+    def isColliding(self,oSprite):
+        x,y = self.coords
+        self.hitbox.set_position((x/6,y/6))
+        self.hitbox.set_angle(self.angle)
+        return Sprite.isColliding(self.hitbox,oSprite.hitbox)
 
     def turn(self):
         if self.joystick_x == 0:
             self.stear *= 0.3
         self.stear += 4 * self.joystick_x
-        self.stear *= 0.9
+        if self.is_braking:
+            self.stear *= 0.9
+            return
+        self.stear *= 0.85
 
     def move(self):
         if self.oiled_time > 0: 
@@ -98,7 +110,6 @@ class Car(Sprite):
             self.drift = 95
             self.Xacceleration = 0
             self.Yacceleration = 0
-            # self.stear *= 1.5
         self.last_pos = (self.x,self.y,self.angle)
 
         self.acceleration += 0.7*self.joystick_y
@@ -109,11 +120,11 @@ class Car(Sprite):
             self.turn()
 
         self.rotate(self.stear/200*self.velocity)
-        if self.joystick_x and abs(self.velocity) > 0:
-            self.drift += 3
+        if self.joystick_x and abs(self.velocity) > 10:
+            self.drift += 1
 
         if self.is_braking:
-            self.drift += 1
+            self.drift += 3
             if not self.joystick_x:
                 self.velocity *= 0.9
         
@@ -139,7 +150,14 @@ class Car(Sprite):
         dx = self.Xvelocity*self.drift/100/1.5
         dy = -self.Yvelocity*self.drift/100/1.5
         self.forward(distance)
-        self.change_position(dx, dy)
+        self.change_position(dx,dy)
+        amount = len(self.track)
+        possible_id = ((self.tile_id-1)%amount, self.tile_id, (self.tile_id+1)%amount)
+        if True in [self.isColliding(self.track[id-1]) for id in possible_id]:
+            self.back()
+            self.Xvelocity = -dx*1.5
+            self.Yvelocity = -dy*1.5
+            self.drift = 100
 
     def back(self):
         self.set_position(self.last_pos[0:2])
