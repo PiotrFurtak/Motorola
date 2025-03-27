@@ -1,5 +1,7 @@
 import pygame
 
+# Początkowo miało być wiele przecisków w menu, ale niestety nie zostało to zrobione
+
 class Button:
     def __init__(self,window,centreCoords,image):
         self.window:pygame.Surface = window
