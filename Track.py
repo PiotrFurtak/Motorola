@@ -4,9 +4,8 @@ import pygame
 
 class Turn(Sprite):
     """ type can be for example NE, meaning you approach turn from up(N), and leave a tile from right(E) side """
-    # type : (angle, measure point, should_reverse_measured_angle?)
-    types = {"NE":{"angle":90,"measure_point":(130,0),"reverse?":False},
-                "EN":{"angle":90,"measure_point":(130,0),"reverse?":True},
+    types = {"NE":{"angle":90,"measure_point":(130,0),"reverse?":False},  # Pierwsza litera typu oznacza skąd wjeżdżamy na pole
+                "EN":{"angle":90,"measure_point":(130,0),"reverse?":True},# a druga oznacza skąd wyjeżdżamy z pola
                 "NW":{"angle":180,"measure_point":(0,0),"reverse?":False},
                 "WN":{"angle":180,"measure_point":(0,0),"reverse?":True},
                 "SE":{"angle":0,"measure_point":(130,130),"reverse?":False},
@@ -14,10 +13,10 @@ class Turn(Sprite):
                 "SW":{"angle":270,"measure_point":(0,130),"reverse?":False},
                 "WS":{"angle":270,"measure_point":(0,130),"reverse?":True}}
     
-    def set_pixel_values(measure_point,reverse,height,width):
-        values = []
-        for y in range(height+1):
-            column = []
+    def set_pixel_values(measure_point,reverse,height,width): # Każdy piksel ma swoją "zakrzywioną geometryczną wartość"
+        values = []                                           # x oznacza odległość tzn. im większy x tym dalej pojechaliśmy od staru
+        for y in range(height+1):                             # y oznacza wychylenie na lewo-prawo
+            column = []                                       # W zależności od typu zakrętu będzie się zmieniać sposób liczenia x i y
             for x in range(width+1):
                 dx = measure_point[0] - x
                 dy = measure_point[1] - y
@@ -47,23 +46,23 @@ class Turn(Sprite):
         self.type = type
         angle = self.types[type]["angle"]
         Sprite.__init__(self,window,coords,image,(65,65),angle)
-        self.hitbox = Sprite(self.window,coords,pygame.image.load("imgs/turn-hitbox.png"),(65,65),angle)
-        self.id = id
+        self.hitbox = Sprite(self.window,coords,pygame.image.load("imgs/turn-hitbox.png"),(65,65),angle) # Każde pole ma osobno dostęp do swojego hitboxa
+        self.id = id # Oraz ma swoje id
         
-        self.values = self.values[type]
+        self.values = self.values[type] # Oraz swoje wartości x i y
 
-    def scale(self,factor):
+    def scale(self,factor): # Skalujemy pole toru normalnie, ale hitboxa specjalnie nie ruszamy, żeby nie spadała wydajność
         self.scale_factor = factor
-        self.hitbox.set_position((self.x/factor,self.y/factor))
-        Sprite.scale_by(self,factor)
+        self.hitbox.set_position((self.x/factor,self.y/factor)) # Zamiast tego stosujemy jednokładność względem punktu (0,0)
+        Sprite.scale_by(self,factor)                            # i będziemy zmniejszać auto do proporcjonalnej wielkości
 
-    def get_pixel_values(self,coords):
+    def get_pixel_values(self,coords): # Podajemy zwykłe współrzędne i funkcja zwraca te wartości swoje specjalne x,y
         x,y = coords
         x += self.centre_point[0] - self.x
         y += self.centre_point[1] - self.y
         return self.values[int(y//self.scale_factor)][int(x//self.scale_factor)]
 
-class Forward(Sprite):
+class Forward(Sprite):             # Tutaj generalnie wszystko będzie analogicznie
     types = {"WE":{"angle":0},
             "EW":{"angle":180},
             "SN":{"angle":90},
@@ -122,12 +121,12 @@ class Forward(Sprite):
         y += self.centre_point[1] - self.y
         return self.values[int(y//self.scale_factor)][int(x//self.scale_factor)]
 
-def get_level(file_name,window,turn_image,forward_image):
+def get_level(file_name,window,turn_image,forward_image): # Czytamy poziom z odpowiedniego pliku .txt i zwracamy listę z polami toru
     file = open("levels/%s"%file_name, "r")
     lines = file.readlines()
     level = []
     for line in lines:
-        obj,x,y,obj_type,id = line.split(",")
+        obj,x,y,obj_type,id = line.split(",") # Interesuje nas klasa (zakręt/prosta), koordynaty, typ (np. "NW") i id
         x = int(x)
         y = int(y)
         id = int(id)
@@ -136,82 +135,7 @@ def get_level(file_name,window,turn_image,forward_image):
         elif obj.lower() == "forward":
             level.append(Forward(window,(x,y),forward_image,obj_type,id))
     file.close()
-    return level
-
-def update_level(file_name,level):
-    file = open("levels/%s"%file_name, "w")
-    for object in level:
-        obj = "turn" if type(object) == Turn else "forward"
-        x,y = object.coords
-        obj_type = object.type
-        id = object.id
-        file.write(obj+","+str(x)+","+str(y)+","+obj_type+","+str(id)+"\n")
-    file.close()
-
-if __name__ == "__main__":
-    import pygame
-    from time import sleep
-    from sys import exit
-    pygame.init()
-    window = pygame.display.set_mode((800,640))
-    turn_img = pygame.image.load("imgs/turn.png")
-    forward_img = pygame.image.load("imgs/forward.png")
-
-    # level = get_level("level-1.txt",window,turn_img,forward_img)
-    # for oSprite in level:
-    #     oSprite.scale(3)
-    # id = len(level)
-
-    track = Turn(window,(130,130),turn_img,"NE",1)
-    track.scale(2)
-    obj_type = "NE"
-    obj_class = Forward
-    img = forward_img
-    print(obj_class,obj_type)
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.display.quit()
-                exit()
-            # if event.type == pygame.MOUSEBUTTONDOWN:
-            #     x,y = pygame.mouse.get_pos()
-            #     x = x - x%130
-            #     y = y - y%130
-            #     clicked_something = False
-            #     for obj in level:
-            #         if obj.coords == (x,y):
-            #             clicked_something = True
-            #     if not clicked_something:
-            #         id += 1
-            #         print(obj_class)
-            #         level.append(obj_class(window,(x,y),img,obj_type,id))
-            # if event.type == pygame.KEYDOWN:
-            #     if event.key == pygame.K_RETURN:
-            #         update_level("level-1.txt",level)
-            #     elif event.key == pygame.K_w:
-            #         obj_type = "N" + obj_type[1]
-            #     elif event.key == pygame.K_d:
-            #         obj_type = "E" + obj_type[1]
-            #     elif event.key == pygame.K_s:
-            #         obj_type = "S" + obj_type[1]
-            #     elif event.key == pygame.K_a:
-            #         obj_type = "W" + obj_type[1]
-            #     elif event.key == pygame.K_i:
-            #         obj_type = obj_type[0] + "N"
-            #     elif event.key == pygame.K_l:
-            #         obj_type = obj_type[0] + "E"
-            #     elif event.key == pygame.K_k:
-            #         obj_type = obj_type[0] + "S"
-            #     elif event.key == pygame.K_j:
-            #         obj_type = obj_type[0] + "W"
-            #     elif event.key == pygame.K_0:
-            #         obj_class = Forward if obj_class == Turn else Turn
-            #         img = forward_img if obj_class == Forward else turn_img
-            #     print(obj_class,obj_type)
-
-        window.fill("Black")
-        track.draw()
-        # for obj in level:
-        #     obj.draw()
-        pygame.display.update()
-        sleep(0.01)
+    return level # Zwracamy listę z gotowymi obiektami
+#
+# Kiedyś był tu też "kreator poziomu", ale był średnio intuicyjny oraz nie był priorytetem, dlatego został usunięty
+#
