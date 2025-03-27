@@ -17,6 +17,7 @@ class Game:
         self.pressed_keys = set()
 
         self.font = pygame.font.Font(None, 36)  # Czcionka do radia
+        self.bigger_font = pygame.font.Font(None,72)
         self.radio = None  # Na początku nie ma radia
         self.buffered = pygame.surface.Surface((8000, 8000))
         # self.border = Sprite(self.window,(550,200),pygame.image.load("imgs/track-border.png"),(450,450))
@@ -43,6 +44,7 @@ class Game:
         self.scores = []
         self.winners = []
         self.begginingTime = time()
+        self.oil_img = pygame.image.load("imgs/oil.png")
         self.game_loop()
 
 
@@ -94,6 +96,11 @@ class Game:
             self.window.blit(enemy_laps_text, (10, 10+30*oCar.car_id))
         if self.radio:
             self.radio.draw()
+        self.window.blit(self.oil_img,(self.WINDOW_WIDTH*7//10,self.WINDOW_HEIGHT//2))
+        oil_text = str(self.player.oil_cooldown//60)
+        if oil_text == "0": oil_text = "K"
+        oil_cooldown = self.bigger_font.render(oil_text,True,self.WHITE)
+        self.window.blit(oil_cooldown,(self.WINDOW_WIDTH*7//10+35,self.WINDOW_HEIGHT//2+27))
             
     def check_winner(self, oCar):
         if oCar.laps >= self.max_laps and oCar not in self.winners:
@@ -144,6 +151,7 @@ class Game:
             self.player.set_laps()
             [enemy.set_laps() for enemy in self.enemies]
             [self.check_winner(oCar) for oCar in self.allCars]
+            [enemy.check_oil_collision(self.player) for enemy in self.enemies]
 
             num = random.randint(1, 1)
             if self.radio is None:

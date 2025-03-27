@@ -26,8 +26,16 @@ class Car(Sprite):
         self.laps_times = [time()]
         self.best_lap_time = 1000000
         self.point = Sprite(self.window,(0,0),pygame.image.load("imgs/point.png"),(2,2),0)
+        self.oil_cooldown = 0
+        self.oil_coords = (0,0)
+        self.oil_radius = 0
+        self.oiled_time = 0
 
     def draw(self,x,y):
+        if self.oil_radius > 0:
+            pygame.draw.circle(self.window,(0,0,0),(x+self.oil_coords[0],y+self.oil_coords[1]),self.oil_radius)
+            if self.oil_radius < 75:
+                self.oil_radius += 1
         Sprite.draw(self,x,y)
         # self.point.draw(x,y)
 
@@ -54,6 +62,30 @@ class Car(Sprite):
         if pygame.K_SPACE in self.pressed_keys:
             self.is_braking = True
 
+        if self.oil_cooldown > 0:
+            self.oil_cooldown += -1
+        if pygame.K_k in self.pressed_keys:
+            self.spill_oil()
+
+    def spill_oil(self):
+        if self.oil_cooldown > 0:
+            return
+        self.oil_coords = self.x,self.y
+        self.oil_radius = 1
+        self.oil_cooldown = 60*15
+
+    def check_oil_collision(self,player):
+        if player.oil_radius == 0:
+            return False
+        oil = pygame.surface.Surface((player.oil_radius*2,player.oil_radius*2))
+        pygame.draw.circle(oil,(0,0,0),(player.oil_radius,player.oil_radius),player.oil_radius)
+        mask = pygame.mask.from_surface(oil)
+        if self.mask.overlap(mask,(self.x-player.oil_coords[0],self.y-player.oil_coords[1])):
+            self.oiled_time = 60*3
+            return True
+        return False
+        
+
     def turn(self):
         if self.joystick_x == 0:
             self.stear *= 0.3
@@ -61,6 +93,12 @@ class Car(Sprite):
         self.stear *= 0.9
 
     def move(self):
+        if self.oiled_time > 0: 
+            self.oiled_time += -1
+            self.drift = 95
+            self.Xacceleration = 0
+            self.Yacceleration = 0
+            # self.stear *= 1.5
         self.last_pos = (self.x,self.y,self.angle)
 
         self.acceleration += 0.7*self.joystick_y
@@ -89,8 +127,12 @@ class Car(Sprite):
         self.Yvelocity += self.Yacceleration
 
         self.velocity *= 0.96
-        self.Xvelocity *= 0.96
-        self.Yvelocity *= 0.96
+        if not self.oiled_time:
+            self.Xvelocity *= 0.96
+            self.Yvelocity *= 0.96
+        else:
+            self.Xvelocity *= 0.98
+            self.Yvelocity *= 0.98
 
         self.not_drift = 100 - self.drift
         distance = self.velocity*self.not_drift/100/1

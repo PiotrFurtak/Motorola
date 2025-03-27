@@ -34,7 +34,7 @@ def main_loop():
                         scores = start_game()
                         if scores:
                             draw_table(scores)
-                            input()
+                            # Tu ma być przycisk do pominięcia ekranu
 
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
