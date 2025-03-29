@@ -23,6 +23,7 @@ class Game:
         self.buffered = pygame.surface.Surface((8000, 8000)) # Tu będzie zbuforowany tor, w celu poprawy wydajności
         turn_img = pygame.image.load("imgs/turn.png")
         forward_img = pygame.image.load("imgs/forward.png")
+        start_finish_img = pygame.image.load("imgs/finish.png")
         self.track = get_level("level-1.txt",self.buffered,turn_img,forward_img) # Lista kawałków toru
         self.GRASS_IMG = pygame.image.load("imgs/grass.jpg")
         for x in range(0, 8001, self.GRASS_IMG.get_width()):       # Tworzymy w buforze tło zrobione z trawy
@@ -33,6 +34,8 @@ class Game:
             oTrack.scale(6)
         for oTrack in self.track: # Rysujemy tor na buforze
             oTrack.draw(4000,4000)
+
+        self.buffered.blit(pygame.transform.scale_by(start_finish_img,4.7),(-2455+4000,815+4000)) # Rysujemy start/metę
 
         self.player = Car(self.window,self.track,(-2420,900),pygame.image.load("imgs/red-car.png"),(38,19),90,0)
         ai_amount = 4
