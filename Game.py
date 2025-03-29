@@ -72,20 +72,22 @@ class Game:
         self.player.get_pressed_keys(self.pressed_keys) # Wysyłamy autu gracza informację o klawiszach
 
     def countdown(self):
-        surface = pygame.surface.Surface((self.WINDOW_WIDTH,self.WINDOW_HEIGHT),pygame.SRCALPHA)
+        surface = pygame.surface.Surface((self.WINDOW_WIDTH,self.WINDOW_HEIGHT),pygame.SRCALPHA) # Półprzeźroczysta powierzchnia
         font = pygame.font.SysFont("bahnschrift", 500)
-        three = font.render("3",True,(198, 27, 21))
-        two = font.render("2",True,(212, 238, 71))
-        one = font.render("1",True,(78, 205, 58))
-        counting = (three,two,one)
-        pygame.draw.rect(surface,(0,0,0,100),(0,0,self.WINDOW_WIDTH,self.WINDOW_HEIGHT))
-        for x in counting:
-            surface.blit(x,(self.WINDOW_WIDTH//2-x.get_width()//2,self.WINDOW_HEIGHT//2-x.get_height()//2))
-            self.window.blit(surface,(0,0))
-            pygame.display.update()
-            sleep(1)
+        three = font.render("3",True,(198, 27, 21))  #
+        two = font.render("2",True,(212, 238, 71))   # Odpowiednie napisy
+        one = font.render("1",True,(78, 205, 58))    #
+        for i,x in enumerate((three,two,one)):
+            pygame.draw.rect(surface,(0,0,0,100+50*i),(0,0,self.WINDOW_WIDTH,self.WINDOW_HEIGHT)) # Z każdą sekundą ciemniej
+            surface.blit(x,(self.WINDOW_WIDTH//2-x.get_width()//2,self.WINDOW_HEIGHT//2-x.get_height()//2)) # Centrujemy liczbę na powierzchni
+            self.window.blit(surface,(0,0)) # Wyrzucamy na ekran
+            pygame.display.update() # Uaktualniamy
+            sleep(1) # Czekamy sekundę
+            self.window.fill(self.WHITE) # Czyścimy ekran
+            self.draw() # Rysujmy wszystko z powrotem
 
-        self.is_countdown_finished = True
+        pygame.display.update() # Uaktualniamy 
+        self.is_countdown_finished = True # Zmienna =True powoduje, że nigdy więcej ta funkcja się nie wywoła
         
 
     def draw(self): # Funkcja rysująca wszystko na ekranie
@@ -143,8 +145,6 @@ class Game:
         oil_cooldown = self.bigger_font.render(oil_text,True,self.YELLOW)
         surface.blit(oil_cooldown,(self.WINDOW_WIDTH*7//10+35,self.WINDOW_HEIGHT//2+27))
 
-        
-        
         self.window.blit(surface,(0,0)) # Na końcu rysujemy pomocniczą powierzchnię na rzeczywistym ekranie
 
 
@@ -224,5 +224,5 @@ class Game:
 
             self.draw() # Rysujemy wszystko co mamy narysować
             pygame.display.update() # Aktualizacja na ekranie
-            if not self.is_countdown_finished: self.countdown()
+            if not self.is_countdown_finished: self.countdown() # Wywołaj funkcję tylko jeśli jej nie wywoływaliśmy wcześniej
             self.clock.tick(60) # Ustawiamy FPS na 60          
