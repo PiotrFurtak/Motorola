@@ -37,9 +37,10 @@ class Game:
 
         self.buffered.blit(pygame.transform.scale_by(start_finish_img,4.7),(-2455+4000,815+4000)) # Rysujemy start/metę
 
-        self.player = Car(self.window,self.track,(-2420,900),pygame.image.load("imgs/red-car.png"),(38,19),90,0)
+        self.player = Car(self.window,self.track,(-2360,900),pygame.image.load("imgs/red-car.png"),(38,19),90,0)
         ai_amount = 4
-        self.enemies = tuple([ai(self.window,self.track,(-2320+100*i,900),pygame.image.load("imgs/red-car.png"),(38,19),90,i+1,self.player) for i in range(ai_amount)])
+        self.enemies = tuple([ai(self.window,self.track,(-2360+91.2*(1+i),900),pygame.image.load("imgs/red-car.png"),(38,19),90,i+1,self.player) for i in range(ai_amount)])
+        self.enemies[3].set_position(self.enemies[2].coords) # Ustawiamy pozycję Bota4 na pozycję Bota3
         self.enemies = self.enemies[0:2]+tuple([self.enemies[3]]) # Usuwamy bota 3
         self.allCars = tuple([self.player]+list(self.enemies)) # Krotka z odpowiednio: graczem i 4 botami
         self.max_laps = 3  # Regulacja długości wyścigu
