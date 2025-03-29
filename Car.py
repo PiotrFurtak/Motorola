@@ -154,10 +154,10 @@ class Car(Sprite):
         amount = len(self.track)
         possible_id = ((self.tile_id-1)%amount, self.tile_id, (self.tile_id+1)%amount) # Patrzymy na sąsiednie pola toru
         if True in [self.isColliding(self.track[id-1]) for id in possible_id]: # Sprawdzamy kolizje
-            self.back()              # 
-            self.Xvelocity = -dx*1.5 # Cofamy i odbijamy samochód
-            self.Yvelocity = -dy*1.5 #
-            self.drift = 100         # Ustawiamy też ślizg na maksa (Niestety nie działa tak jakbym chciał :(      )
+            self.back()              # Cofamy smochód
+            self.Xvelocity = -self.velocity*cos(radians(self.angle)) # Odbijamy jego prędkości
+            self.Yvelocity = -self.velocity*sin(radians(self.angle)) #
+            self.drift = 100         # Ustawiamy też ślizg na maksa
 
     def back(self):
         self.set_position(self.last_pos[0:2]) # Cofamy do zapisanej pozycji

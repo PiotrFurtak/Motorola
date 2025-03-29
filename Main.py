@@ -12,7 +12,6 @@ player_nick = ""
 scores = []
 
 
-
 def start_game(): 
     oGame = Game(window,player_nick) # Rozpoczynamy grę
     scores = oGame.scores # Patrzymy na wyniki tej gry

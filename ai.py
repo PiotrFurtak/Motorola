@@ -67,7 +67,7 @@ class ai(Car):
                     value = -0.03*(y)**2+150+x # W przeciwnym razie jedź środkiem
                     
                 value += self.is_next_lap(self.find_tile(coords)) * 100000
-                if abs(y) > 30: value -= 200000 # No i spróbuj nie wpieprzać się w bariery...
+                if abs(y) > 25: value -= 200000 # No i spróbuj nie wpieprzać się w bariery...
 
         return value
     
