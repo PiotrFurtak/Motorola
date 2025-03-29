@@ -21,14 +21,6 @@ class ai(Car):
         new_y = y + self.player.y - self.WINDOW_HEIGHT//2
         return (new_x,new_y)
     
-    def find_pixel_values(self,coords): # Dla danego piksela w grze, zwróć wartości x,y "Zakrzywionej geometrii"
-        oTrack:Sprite = self.find_tile(coords)
-        if oTrack:
-            values = oTrack.get_pixel_values(coords)
-            return values[0]+1000*oTrack.id,values[1]
-        return None
-    
-    
     def evaluate(self,pixel_values,coords): # Każde auto w inny sposób ocenia, jak bardzo opłaca się dany piksel
         x,y = pixel_values
         match self.car_id:
