@@ -192,3 +192,10 @@ class Car(Sprite):
             if oTrack.x-oTrack.centre_point[0] <= x <= oTrack.x+oTrack.centre_point[0] and oTrack.y-oTrack.centre_point[1] <= y <= oTrack.y+oTrack.centre_point[1]:
                 return oTrack
         return None
+    
+    def find_pixel_values(self,coords): # Dla danego piksela w grze, zwróć wartości x,y "Zakrzywionej geometrii"
+        oTrack:Sprite = self.find_tile(coords)
+        if oTrack:
+            values = oTrack.get_pixel_values(coords)
+            return values[0]+1000*oTrack.id,values[1]
+        return None

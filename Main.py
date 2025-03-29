@@ -9,6 +9,7 @@ BUTTON = pygame.image.load("imgs/start-button.png")
 BUTTON = pygame.transform.scale(BUTTON,(100,50))
 startButton = Button(window,(WINDOW_WIDTH//2,WINDOW_HEIGHT//1.3),BUTTON)
 player_nick = ""
+scores = []
 
 
 
@@ -24,7 +25,6 @@ def draw_table(scores):
         string = f"Miejsce {i+1}. {car_names[oCar.car_id]} - Czas przejazdu: "+"{0:.3f}".format(time)+", Najszybsze okrążenie: "+"{0:.3f}".format(best_lap_time)
         text = FONT.render(string,True,(242, 245, 47))
         window.blit(text,(WINDOW_WIDTH//2-text.get_width()//2,i*50+100)) 
-    startButton.draw() # A na końcu rysujemy przycisk do włączenia gry znowu
 
 def update_nick(event,player_nick):
     if 48 <= event.key <= 57:    # Sprawdzamy czy wciśnięto cyfrę
@@ -52,18 +52,20 @@ while True: # Pętla główna aplikacji
             if event.key == pygame.K_ESCAPE: # Wychodzimy również klawiszem esc
                 pygame.quit()
                 exit()
-            player_nick = update_nick(event,player_nick)  # Uaktualniamy nick
-            nick = FONT.render("Wpisz swój nick: "+player_nick,True,(242, 245, 47))  # Uaktualniamy surface
+            if not scores:
+                player_nick = update_nick(event,player_nick)  # Uaktualniamy nick
+                nick = FONT.render("Wpisz swój nick: "+player_nick,True,(242, 245, 47))  # Uaktualniamy surface
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:  # Sprawdzamy czy wcisnęliśmy lewy przycisk myszy
                 if startButton.isClicked(event.pos) and player_nick: # Sprawdzamy czy myszka najechała na przycisk i czy wpisano nick
                     scores = start_game() # Zaczynamy grę
                     # Następna linijka wykona się dopiero po zakończeniu lub wyjściu z wyścigu
-                    if scores:
-                        draw_table(scores) # Rysujemy tabelę wyników
             
-    window.fill((0,0,0)) # Cześcimy ekran
-    window.blit(nick,(WINDOW_WIDTH//2 - nick.get_width()//2,WINDOW_HEIGHT//9*4)) # Wypisujemy nick gracza
+    window.fill((0,0,0)) # Czyścimy ekran
+    if scores:
+        draw_table(scores) # Rysujemy tabelę wyników
+    else:
+        window.blit(nick,(WINDOW_WIDTH//2 - nick.get_width()//2,WINDOW_HEIGHT//9*4)) # Wypisujemy nick gracza
     window.blit(info,(WINDOW_WIDTH//2 - info.get_width()//2,WINDOW_HEIGHT//9*8)) # Wypisujemy informację dla gracza
     if player_nick: # Rysujemy przycisk tylko jeśli podano nick
         startButton.draw()
