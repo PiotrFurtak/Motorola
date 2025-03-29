@@ -49,6 +49,9 @@ while True: # Pętla główna aplikacji
             pygame.quit()
             exit()
         elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE: # Wychodzimy również klawiszem esc
+                pygame.quit()
+                exit()
             player_nick = update_nick(event,player_nick)  # Uaktualniamy nick
             nick = FONT.render("Wpisz swój nick: "+player_nick,True,(242, 245, 47))  # Uaktualniamy surface
         elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -58,11 +61,7 @@ while True: # Pętla główna aplikacji
                     # Następna linijka wykona się dopiero po zakończeniu lub wyjściu z wyścigu
                     if scores:
                         draw_table(scores) # Rysujemy tabelę wyników
-
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE: # Wychodzimy również klawiszem esc
-                pygame.quit()
-                exit()
+            
     window.fill((0,0,0)) # Cześcimy ekran
     window.blit(nick,(WINDOW_WIDTH//2 - nick.get_width()//2,WINDOW_HEIGHT//9*4)) # Wypisujemy nick gracza
     window.blit(info,(WINDOW_WIDTH//2 - info.get_width()//2,WINDOW_HEIGHT//9*8)) # Wypisujemy informację dla gracza
