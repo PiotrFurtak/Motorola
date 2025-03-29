@@ -7,7 +7,8 @@ from time import time
 pygame.init()
 
 class Game:
-    def __init__(self, window):
+    def __init__(self, window, player_nick):
+        self.PLAYER_NICK = player_nick
         self.running = False
         self.WHITE = (255, 255, 255)
         self.BLACK = (0, 0, 0)
@@ -88,7 +89,7 @@ class Game:
         pygame.draw.rect(surface,(0,0,0,200),(0,0,400,250)) # Tło na napisy w lewym górnym       # Móc rysować półprzeźroczyste obiekty
         self.player.draw(x,y) # Rysujemy auto gracza
 
-        laps_text = self.font.render(f"Gracz: {len(self.player.laps_times)-1}", True, self.WHITE) # Rysujemy info o okrążeniach gracza
+        laps_text = self.font.render(f"{self.PLAYER_NICK} : {len(self.player.laps_times)-1}", True, self.WHITE) # Rysujemy info o okrążeniach gracza
         surface.blit(laps_text, (10, 60))
 
         for oCar in self.enemies: # Rysujemy każdego przeciwnika wraz z info o jego okrążeniach
