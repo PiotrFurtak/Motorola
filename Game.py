@@ -56,6 +56,10 @@ class Game:
         self.sorted_cars = []
         self.car_names = {0:self.PLAYER_NICK,1:"Bot1",2:"Bot2",3:"Bot3",4:"Bot4"}
         self.is_countdown_finished = False
+        self.red_point = pygame.image.load("imgs/point.png")
+        self.red_point.fill((255,0,0))
+        self.green_point = pygame.image.load("imgs/point.png")
+        self.green_point.fill((0,255,0))
         self.game_loop()  # Zaczynamy grę
 
 
@@ -156,6 +160,7 @@ class Game:
         surface.blit(oil_cooldown,(self.WINDOW_WIDTH*7//10+35,self.WINDOW_HEIGHT//2+27))
 
         self.window.blit(surface,(0,0)) # Na końcu rysujemy pomocniczą powierzchnię na rzeczywistym ekranie
+        self.draw_minimap()
 
 
             
@@ -238,3 +243,29 @@ class Game:
             pygame.display.update() # Aktualizacja na ekranie
             if not self.is_countdown_finished: self.countdown() # Wywołaj funkcję tylko jeśli jej nie wywoływaliśmy wcześniej
             self.clock.tick(60) # Ustawiamy FPS na 60          
+
+    def draw_minimap(self):
+        minimap = pygame.surface.Surface((600,400),pygame.SRCALPHA)
+        factor = 0.05
+        for oTrack in self.track:
+            img = pygame.transform.scale_by(oTrack.image,factor)
+            img = pygame.mask.from_surface(img)
+            img = img.to_surface(setcolor=(0,0,0,200),unsetcolor=(0,0,0,0))
+            x,y = oTrack.coords
+            x *= factor
+            y *= factor
+            minimap.blit(img,(x+300-390*factor,y+150-390*factor))
+        for oCar in self.allCars:
+            x,y = oCar.coords
+            x *= factor
+            y *= factor
+            if oCar == self.player:
+                minimap.blit(self.green_point,(x+300,y+150))
+            else:
+                minimap.blit(self.red_point,(x+300,y+150))
+        if self.CHOSEN_LEVEL == 1:
+            self.window.blit(minimap,(1100,-50))
+        elif self.CHOSEN_LEVEL == 2:
+            self.window.blit(minimap,(1000,0))
+        else:
+            self.window.blit(minimap,(1100,0))

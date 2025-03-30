@@ -61,8 +61,8 @@ class ai(Car):
                 player_pixel_values = self.find_pixel_values(self.player.coords)
                 if player_pixel_values == None:
                     value = -0.03*(y)**2+150+x
-                elif player_pixel_values[0]+20 < x:
-                    value = -0.03*(y-player_pixel_values[1])**2+150+x # Jak jest przed graczem, to jedź centralnie przed nim
+                elif player_pixel_values[0]+20 < x < player_pixel_values[0]+1200:
+                    value = -0.03*(y-player_pixel_values[1])**2+150+x # Jak jest tuż przed graczem, to jedź centralnie przed nim
                 else:
                     value = -0.03*(y)**2+150+x # W przeciwnym razie jedź środkiem
                     
