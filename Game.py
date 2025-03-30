@@ -29,7 +29,7 @@ class Game:
         turn_img = pygame.image.load("imgs/turn.png")
         forward_img = pygame.image.load("imgs/forward.png")
         start_finish_img = pygame.image.load("imgs/finish.png")
-        self.track = get_level("level-1.txt",self.buffered,turn_img,forward_img) # Lista kawałków toru
+        self.track = get_level(f"level-{self.CHOSEN_LEVEL}.txt",self.buffered,turn_img,forward_img) # Lista kawałków toru
         self.GRASS_IMG = pygame.image.load("imgs/grass.jpg")
         for x in range(0, 8001, self.GRASS_IMG.get_width()):       # Tworzymy w buforze tło zrobione z trawy
             for y in range(0, 8001, self.GRASS_IMG.get_height()):  # składające się z powtarzającej się tekstury
@@ -228,7 +228,7 @@ class Game:
             [enemy.check_oil_collision(self.player) for enemy in self.enemies] # Sprawdzamy czy przeciwnicy nie wjechali w olej
             self.sorted_cars = self.sort_cars() # Ustawiamy auta od najlepszego do najgorszego
 
-            num = random.randint(1, 1) # Wybieramy piosenkę (Ale jest tylko jedna)
+            num = random.randint(1, 2) # Wybieramy piosenkę (Ale jest tylko jedna)
             if self.radio is None:
                 self.radio = CarRadio(self.window, self.font, f"music/music{num}.mp3", self.WINDOW_WIDTH, self.WINDOW_HEIGHT)
 
