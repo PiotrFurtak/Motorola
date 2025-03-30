@@ -84,11 +84,14 @@ class Game:
             self.window.blit(surface,(0,0)) # Wyrzucamy na ekran
             pygame.display.update() # Uaktualniamy
             sleep(1) # Czekamy sekundę
+            self.begginingTime = time()
             self.window.fill(self.WHITE) # Czyścimy ekran
+            for oCar in self.allCars: oCar.laps_times[-1] = time()
             self.draw() # Rysujmy wszystko z powrotem
 
         pygame.display.update() # Uaktualniamy 
         self.is_countdown_finished = True # Zmienna =True powoduje, że nigdy więcej ta funkcja się nie wywoła
+        self.begginingTime = time()
         
 
     def draw(self): # Funkcja rysująca wszystko na ekranie
@@ -124,7 +127,8 @@ class Game:
             lap_text = self.font.render(f"{self.car_names[oCar.car_id]}: {laps}: {last_time}", True, self.WHITE) # Właściwe rysowanie
             text_to_blit.setdefault(lap_text,(10,60+35*i)) # Dodajemy do kolejnki do rysowania
 
-        player_lap_time = self.font.render("Czas okrążenia: "+"{0:.3f}".format(time()-self.player.laps_times[-1]),True,self.YELLOW)
+        actual_time = time()-self.player.laps_times[-1]
+        player_lap_time = self.font.render("Czas okrążenia: "+"{0:.3f}".format(actual_time if self.is_countdown_finished else 0),True,self.YELLOW)
         text_to_blit.setdefault(player_lap_time,(10,10)) # Info o aktualnym czasie okrążenia gracza
 
         surface = pygame.surface.Surface((self.WINDOW_WIDTH,self.WINDOW_HEIGHT),pygame.SRCALPHA) # Zmienna surface istnieje po to, żeby rysować
