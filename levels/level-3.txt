@@ -1,0 +1,14 @@
+forward,-2220,560,SN,1
+turn,-2220,-220,SE,2
+forward,-1440,-220,WE,3
+turn,-660,-220,WN,4
+forward,-660,-1000,SN,5
+turn,-660,-1780,SE,6
+turn,120,-1780,WS,7
+forward,120,-1000,NS,8
+forward,120,-220,NS,9
+forward,120,560,NS,10
+turn,120,1340,NW,11
+forward,-660,1340,EW,12
+forward,-1440,1340,EW,13
+turn,-2220,1340,EN,14
