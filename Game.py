@@ -166,6 +166,8 @@ class Game:
             if oCar == self.player:
                 self.aproximate_scores() # Jeśli wygrał gracz, to szacujemy czasy przeciwników i wracamy do menu
                 self.running = False
+                if self.radio:
+                    self.radio.toggle_radio()
             else:
                 oCar.already_won = True # Dajemy znać przeciwnikom, że już skończyli
     
@@ -228,7 +230,7 @@ class Game:
             [enemy.check_oil_collision(self.player) for enemy in self.enemies] # Sprawdzamy czy przeciwnicy nie wjechali w olej
             self.sorted_cars = self.sort_cars() # Ustawiamy auta od najlepszego do najgorszego
 
-            num = random.randint(1, 2) # Wybieramy piosenkę (Ale jest tylko jedna)
+            num = random.randint(1, 2) # Wybieramy piosenkę
             if self.radio is None:
                 self.radio = CarRadio(self.window, self.font, f"music/music{num}.mp3", self.WINDOW_WIDTH, self.WINDOW_HEIGHT)
 
