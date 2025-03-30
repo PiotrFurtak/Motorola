@@ -29,7 +29,7 @@ class Game:
         turn_img = pygame.image.load("imgs/turn.png")
         forward_img = pygame.image.load("imgs/forward.png")
         start_finish_img = pygame.image.load("imgs/finish.png")
-        self.track = get_level("level-1.txt",self.buffered,turn_img,forward_img) # Lista kawałków toru
+        self.track = get_level(f"level-{self.CHOSEN_LEVEL}.txt",self.buffered,turn_img,forward_img) # Lista kawałków toru
         self.GRASS_IMG = pygame.image.load("imgs/grass.jpg")
         for x in range(0, 8001, self.GRASS_IMG.get_width()):       # Tworzymy w buforze tło zrobione z trawy
             for y in range(0, 8001, self.GRASS_IMG.get_height()):  # składające się z powtarzającej się tekstury
@@ -42,7 +42,7 @@ class Game:
 
         self.buffered.blit(pygame.transform.scale_by(start_finish_img,4.7),(-2455+4000,815+4000)) # Rysujemy start/metę
 
-        self.player = Car(self.window,self.track,(-2360,900),pygame.image.load("imgs/red-car.png"),(38,19),90,0)
+        self.player = Car(self.window,self.track,(-2360,900),pygame.image.load("imgs/green-car.png"),(38,19),90,0)
         ai_amount = 4
         self.enemies = tuple([ai(self.window,self.track,(-2360+91.2*(1+i),900),pygame.image.load("imgs/red-car.png"),(38,19),90,i+1,self.player) for i in range(ai_amount)])
         self.enemies[3].set_position(self.enemies[2].coords) # Ustawiamy pozycję Bota4 na pozycję Bota3
@@ -166,6 +166,8 @@ class Game:
             if oCar == self.player:
                 self.aproximate_scores() # Jeśli wygrał gracz, to szacujemy czasy przeciwników i wracamy do menu
                 self.running = False
+                if self.radio.radio_on:
+                    self.radio.toggle_radio()
             else:
                 oCar.already_won = True # Dajemy znać przeciwnikom, że już skończyli
     
@@ -228,7 +230,7 @@ class Game:
             [enemy.check_oil_collision(self.player) for enemy in self.enemies] # Sprawdzamy czy przeciwnicy nie wjechali w olej
             self.sorted_cars = self.sort_cars() # Ustawiamy auta od najlepszego do najgorszego
 
-            num = random.randint(1, 1) # Wybieramy piosenkę (Ale jest tylko jedna)
+            num = random.randint(1, 2) # Wybieramy piosenkę
             if self.radio is None:
                 self.radio = CarRadio(self.window, self.font, f"music/music{num}.mp3", self.WINDOW_WIDTH, self.WINDOW_HEIGHT)
 

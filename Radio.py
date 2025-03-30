@@ -1,7 +1,8 @@
 import pygame
 
 music_dict = {
-        "music/music1.mp3": "Love Will Save The World" # Tytuł i lokalizacja pliku z utworem
+        "music/music2.mp3": "Love Will Save The World", # Tytuł i lokalizacja pliku z utworem
+        "music/music1.mp3": "Motorola"
     }
 
 
