@@ -3,7 +3,6 @@ from sys import exit
 from Game import Game
 from Button import Button
 WINDOW_WIDTH, WINDOW_HEIGHT = pygame.display.get_desktop_sizes()[0]
-WINDOW_HEIGHT -= 10
 window = pygame.display.set_mode((WINDOW_WIDTH,WINDOW_HEIGHT))
 FONT = pygame.font.SysFont("bahnschrift", 36)
 BUTTON = pygame.image.load("imgs/start-button.png")
