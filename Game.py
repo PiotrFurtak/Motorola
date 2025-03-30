@@ -166,7 +166,7 @@ class Game:
             if oCar == self.player:
                 self.aproximate_scores() # Jeśli wygrał gracz, to szacujemy czasy przeciwników i wracamy do menu
                 self.running = False
-                if self.radio:
+                if self.radio.radio_on:
                     self.radio.toggle_radio()
             else:
                 oCar.already_won = True # Dajemy znać przeciwnikom, że już skończyli
