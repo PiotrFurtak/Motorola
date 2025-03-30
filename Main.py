@@ -3,17 +3,21 @@ from sys import exit
 from Game import Game
 from Button import Button
 WINDOW_WIDTH, WINDOW_HEIGHT = pygame.display.get_desktop_sizes()[0]
+WINDOW_HEIGHT -= 10
 window = pygame.display.set_mode((WINDOW_WIDTH,WINDOW_HEIGHT))
 FONT = pygame.font.SysFont("bahnschrift", 36)
 BUTTON = pygame.image.load("imgs/start-button.png")
-BUTTON = pygame.transform.scale(BUTTON,(100,50))
+BUTTON = pygame.transform.scale(BUTTON,(400,180))
 startButton = Button(window,(WINDOW_WIDTH//2,WINDOW_HEIGHT//1.3),BUTTON)
+LEVEL_BUTTONS_IMG = [pygame.image.load(f"imgs/level-{i+1}-button.png") for i in range(3)]  # Ustaw zdjęcia
+level_buttons = [Button(window,(WINDOW_WIDTH//2-400+400*i,WINDOW_HEIGHT//1.2),LEVEL_BUTTONS_IMG[i]) for i in range(3)] # Definicja obiektów
+chosen_level = 0  # ZERO OZNACZA BRAK WYBRANEGO POZIOMU
 player_nick = ""
 scores = []
 
 
 def start_game(): 
-    oGame = Game(window,player_nick) # Rozpoczynamy grę
+    oGame = Game(window,player_nick,chosen_level) # Rozpoczynamy grę
     scores = oGame.scores # Patrzymy na wyniki tej gry
     return scores # I zwracamy
 
@@ -56,16 +60,25 @@ while True: # Pętla główna aplikacji
                 nick = FONT.render("Wpisz swój nick: "+player_nick,True,(242, 245, 47))  # Uaktualniamy surface
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:  # Sprawdzamy czy wcisnęliśmy lewy przycisk myszy
-                if startButton.isClicked(event.pos) and player_nick: # Sprawdzamy czy myszka najechała na przycisk i czy wpisano nick
+                if startButton.isClicked(event.pos) and player_nick and chosen_level: # Sprawdzamy czy myszka najechała na przycisk i czy wpisano nick
                     scores = start_game() # Zaczynamy grę
                     # Następna linijka wykona się dopiero po zakończeniu lub wyjściu z wyścigu
+                    chosen_level = 0
+                level_buttons_state = [level_buttons[i].isClicked(event.pos) for i in range(3)] # Ustawiamy stan przycisków
+                if True in level_buttons_state:  # Jeśli jakiś wciśnięty
+                    chosen_level = level_buttons_state.index(True)+1 # To ustaw wybrany poziom (1~3)
             
     window.fill((0,0,0)) # Czyścimy ekran
     if scores:
         draw_table(scores) # Rysujemy tabelę wyników
     else:
         window.blit(nick,(WINDOW_WIDTH//2 - nick.get_width()//2,WINDOW_HEIGHT//9*4)) # Wypisujemy nick gracza
-    window.blit(info,(WINDOW_WIDTH//2 - info.get_width()//2,WINDOW_HEIGHT//9*8)) # Wypisujemy informację dla gracza
-    if player_nick: # Rysujemy przycisk tylko jeśli podano nick
+    if not scores:
+        window.blit(info,(WINDOW_WIDTH//2 - info.get_width()//2,WINDOW_HEIGHT//9*2)) # Wypisujemy informację dla gracza
+    if player_nick and chosen_level: # Rysujemy przycisk tylko jeśli podano nick i wybrano poziom
         startButton.draw()
+    if not chosen_level:   # Jeśli nie wybrano to rysuj
+        level_text = FONT.render("Wybierz poziom:",True,(242, 245, 47))
+        window.blit(level_text,(WINDOW_WIDTH//2 - level_text.get_width()//2,WINDOW_HEIGHT//1.6))
+        [oButton.draw() for oButton in level_buttons]
     pygame.display.update() # Uaktualniamy ekran

@@ -7,8 +7,13 @@ from time import time,sleep
 pygame.init()
 
 class Game:
-    def __init__(self, window, player_nick):
+    def __init__(self, window, player_nick,chosen_level):
         self.PLAYER_NICK = player_nick
+        #
+        #
+        self.CHOSEN_LEVEL = chosen_level # Liczba 1,2 lub 3
+        #
+        #
         self.running = False
         self.WHITE = (255, 255, 255)
         self.BLACK = (0, 0, 0)
