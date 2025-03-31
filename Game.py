@@ -78,6 +78,9 @@ class Game:
 
             elif event.type == pygame.KEYUP:
                 self.pressed_keys.discard(event.key)
+            # elif event.type == pygame.MOUSEBUTTONDOWN: # Debugowanie botów
+            #     x,y = self.allCars[1].get_real_point(event.pos)
+            #     print(self.allCars[1].find_pixel_values((x,y)))
 
         self.player.get_pressed_keys(self.pressed_keys) # Wysyłamy autu gracza informację o klawiszach
 

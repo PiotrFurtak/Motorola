@@ -4,16 +4,16 @@ import pygame
 
 class Turn(Sprite):
     """ type can be for example NE, meaning you approach turn from up(N), and leave a tile from right(E) side """
-    types = {"NE":{"angle":90,"measure_point":(130,0),"reverse?":False},  # Pierwsza litera typu oznacza skąd wjeżdżamy na pole
-                "EN":{"angle":90,"measure_point":(130,0),"reverse?":True},# a druga oznacza skąd wyjeżdżamy z pola
-                "NW":{"angle":180,"measure_point":(0,0),"reverse?":False},
-                "WN":{"angle":180,"measure_point":(0,0),"reverse?":True},
-                "SE":{"angle":0,"measure_point":(130,130),"reverse?":False},
-                "ES":{"angle":0,"measure_point":(130,130),"reverse?":True},
-                "SW":{"angle":270,"measure_point":(0,130),"reverse?":False},
-                "WS":{"angle":270,"measure_point":(0,130),"reverse?":True}}
+    types = {"NE":{"angle":90,"measure_point":(130,0),"reverse?":False,"direction":"L"},  # Pierwsza litera typu oznacza skąd wjeżdżamy na pole
+                "EN":{"angle":90,"measure_point":(130,0),"reverse?":True,"direction":"P"},# a druga oznacza skąd wyjeżdżamy z pola
+                "NW":{"angle":180,"measure_point":(0,0),"reverse?":False,"direction":"P"},
+                "WN":{"angle":180,"measure_point":(0,0),"reverse?":True,"direction":"L"},
+                "SE":{"angle":0,"measure_point":(130,130),"reverse?":False,"direction":"P"},
+                "ES":{"angle":0,"measure_point":(130,130),"reverse?":True,"direction":"L"},
+                "SW":{"angle":270,"measure_point":(0,130),"reverse?":False,"direction":"L"},
+                "WS":{"angle":270,"measure_point":(0,130),"reverse?":True,"direction":"P"}}
     
-    def set_pixel_values(measure_point,reverse,height,width): # Każdy piksel ma swoją "zakrzywioną geometryczną wartość"
+    def set_pixel_values(measure_point,reverse,height,width,direction): # Każdy piksel ma swoją "zakrzywioną geometryczną wartość"
         values = []                                           # x oznacza odległość tzn. im większy x tym dalej pojechaliśmy od staru
         for y in range(height+1):                             # y oznacza wychylenie na lewo-prawo
             column = []                                       # W zależności od typu zakrętu będzie się zmieniać sposób liczenia x i y
@@ -32,7 +32,7 @@ class Turn(Sprite):
                 middle_rate = 65*width/130
                 value_x = angle*180/pi
                 value_y = radius-middle_rate
-
+                if direction == "P": value_y *= -1
                 column.append((value_x,value_y))
             values.append(column)
         return values
@@ -40,7 +40,7 @@ class Turn(Sprite):
     values = {}
     for type in types:
         line = types[type]
-        values.setdefault(type,set_pixel_values(line["measure_point"],line["reverse?"],130,130))
+        values.setdefault(type,set_pixel_values(line["measure_point"],line["reverse?"],130,130,line["direction"]))
 
     def __init__(self,window,coords,image,type,id):
         self.type = type
@@ -78,16 +78,16 @@ class Forward(Sprite):             # Tutaj generalnie wszystko będzie analogicz
 
                 if type[0] == "N":
                     value_x = y
-                    value_y = x-middle_rate
+                    value_y = -x+middle_rate
                 elif type[0] == "E":
                     value_x = 130-x
-                    value_y = y-middle_rate
+                    value_y = -y+middle_rate
                 elif type[0] == "S":
                     value_x = 130-y
-                    value_y = -x+middle_rate
+                    value_y = x-middle_rate
                 elif type[0] == "W":
                     value_x = x
-                    value_y = -y+middle_rate
+                    value_y = y-middle_rate
                 
 
                 column.append((value_x,value_y))

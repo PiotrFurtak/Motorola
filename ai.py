@@ -19,7 +19,7 @@ class ai(Car):
         x,y = coords
         new_x = x + self.player.x - self.WINDOW_WIDTH//2
         new_y = y + self.player.y - self.WINDOW_HEIGHT//2
-        return (new_x,new_y)
+        return (new_x,new_y)   
     
     def evaluate(self,pixel_values,coords): # Każde auto w inny sposób ocenia, jak bardzo opłaca się dany piksel
         x,y = pixel_values
@@ -61,7 +61,7 @@ class ai(Car):
                 player_pixel_values = self.find_pixel_values(self.player.coords)
                 if player_pixel_values == None:
                     value = -0.03*(y)**2+150+x
-                elif player_pixel_values[0]+20 < x < player_pixel_values[0]+1200:
+                elif player_pixel_values[0]+20 < x < player_pixel_values[0]+2200:
                     value = -0.03*(y-player_pixel_values[1])**2+150+x # Jak jest tuż przed graczem, to jedź centralnie przed nim
                 else:
                     value = -0.03*(y)**2+150+x # W przeciwnym razie jedź środkiem
