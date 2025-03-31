@@ -63,9 +63,10 @@ while True: # Pętla główna aplikacji
                     scores = start_game() # Zaczynamy grę
                     # Następna linijka wykona się dopiero po zakończeniu lub wyjściu z wyścigu
                     chosen_level = 0
-                level_buttons_state = [level_buttons[i].isClicked(event.pos) for i in range(3)] # Ustawiamy stan przycisków
-                if True in level_buttons_state and not chosen_level:  # Jeśli jakiś wciśnięty
-                    chosen_level = level_buttons_state.index(True)+1 # To ustaw wybrany poziom (1~3)
+                else: # Nie wykrywaj wciśnięcia jeśli właśnie wciskamy start
+                    level_buttons_state = [level_buttons[i].isClicked(event.pos) for i in range(3)] # Ustawiamy stan przycisków
+                    if True in level_buttons_state and not chosen_level:  # Jeśli jakiś wciśnięty
+                        chosen_level = level_buttons_state.index(True)+1 # To ustaw wybrany poziom (1~3)
             
     window.fill((0,0,0)) # Czyścimy ekran
     if scores:

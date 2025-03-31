@@ -245,27 +245,27 @@ class Game:
             self.clock.tick(60) # Ustawiamy FPS na 60          
 
     def draw_minimap(self):
-        minimap = pygame.surface.Surface((600,400),pygame.SRCALPHA)
+        minimap = pygame.surface.Surface((600,400),pygame.SRCALPHA) # Robimy powierzchnię
         factor = 0.05
         for oTrack in self.track:
-            img = pygame.transform.scale_by(oTrack.image,factor)
+            img = pygame.transform.scale_by(oTrack.image,factor) # Skalujemy obraz (Mało optymalne, ale NIE MA ZNACZENIA, więc whatever)
             img = pygame.mask.from_surface(img)
-            img = img.to_surface(setcolor=(0,0,0,200),unsetcolor=(0,0,0,0))
-            x,y = oTrack.coords
-            x *= factor
-            y *= factor
-            minimap.blit(img,(x+300-390*factor,y+150-390*factor))
-        for oCar in self.allCars:
+            img = img.to_surface(setcolor=(0,0,0,200),unsetcolor=(0,0,0,0)) # De facto tworzę grafikę z maski zdjęcia
+            x,y = oTrack.coords  #
+            x *= factor          # Odpowiednio dostosowujemy koordynaty
+            y *= factor          #
+            minimap.blit(img,(x+300-390*factor,y+150-390*factor)) # Wyświetlamy relatywnie na minimapie
+        for oCar in self.allCars: # Dosłownie to samo, ale z samochodami
             x,y = oCar.coords
             x *= factor
             y *= factor
             if oCar == self.player:
-                minimap.blit(self.green_point,(x+300,y+150))
+                minimap.blit(self.green_point,(x+300,y+150)) # Gracz ma zieloną kropkę
             else:
-                minimap.blit(self.red_point,(x+300,y+150))
+                minimap.blit(self.red_point,(x+300,y+150)) # Boty czerwoną
         if self.CHOSEN_LEVEL == 1:
-            self.window.blit(minimap,(1100,-50))
+            self.window.blit(minimap,(1100,-50)) # Różne poziomy wymagają różnego wycentrowania minimapy
         elif self.CHOSEN_LEVEL == 2:
-            self.window.blit(minimap,(1000,0))
+            self.window.blit(minimap,(1000,0))   # Różne poziomy wymagają różnego wycentrowania minimapy
         else:
-            self.window.blit(minimap,(1100,0))
+            self.window.blit(minimap,(1100,0))   # Różne poziomy wymagają różnego wycentrowania minimapy
