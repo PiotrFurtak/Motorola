@@ -138,15 +138,14 @@ class ai(Car):
                     self.joystick_y = 1
             case 3:
                 speed_limit = 7 if abs(self.stear) > 10 else 100
-                if self.velocity < speed_limit:
-                    if not self.already_won: self.acceleration += 0.25
-                    self.joystick_y = 1
+                if self.velocity < speed_limit: self.acceleration += 0.25
+                self.joystick_y = 1
             case 4:
                 speed_limit = 13
                 x1,x2 = self.find_pixel_values(self.coords)[0], self.find_pixel_values(self.player.coords)[0]
                 if x1 - 30 < x2:
                     speed_limit = 18 # Jeśli jest za graczem lub tuż przed, to goń/nie daj się wyprzedzić
-                    self.acceleration += 0.15
+                    self.acceleration += 0.15 # Doganiaj gracza
                 if self.velocity < speed_limit:
                     self.joystick_y = 1
-        if self.already_won: self.joystick_y = 0 # Zatrzymuj jeśli auto skończyło wyścig
+        if self.already_won: self.joystick_y,self.acceleration = 0,0 # Zatrzymuj jeśli auto skończyło wyścig
